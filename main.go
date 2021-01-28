@@ -72,7 +72,7 @@ func main() {
 	}
 	t.templates["index"] = template.Must(template.New("index").Delims("[[", "]]").ParseFiles("client/build/index.html"))
 	t.templates["admin"] = template.Must(template.New("admin").Delims("[[", "]]").ParseFiles("admin/build/index.html"))
-	t.templates["login"] = template.Must(template.New("login").Delims("[[", "]]").ParseFiles("web/login.html"))
+	t.templates["login"] = template.Must(template.New("login").Delims("[[", "]]").ParseFiles("login/build/index.html"))
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -137,11 +137,13 @@ func main() {
 	a.POST("/key", auth.KeyPostHandler)
 	a.DELETE("/key", auth.KeyDeleteHandler)
 
-	e.Static("/favicon.ico", "web/img/favicon.ico")
+	e.Static("/favicon.ico", "web/favicon.ico")
 	e.Static("/static/js", "client/build/static/js")
 	e.Static("/static/css", "client/build/static/css")
 	e.Static("/static/adminjs", "admin/build/static/js")
 	e.Static("/static/admincss", "admin/build/static/css")
+	e.Static("/static/loginjs", "login/build/static/js")
+	e.Static("/static/logincss", "login/build/static/css")
 
 	dbg := e.Group("/debug")
 	dbg.GET("/pprof/*", func(c echo.Context) error {

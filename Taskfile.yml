@@ -10,6 +10,12 @@ tasks:
     dir: admin
     cmds:
       - npm run build
+
+  login_build:
+    dir: login
+    cmds:
+      - npm run build
+
       
   admin:
     deps: [admin_build]
@@ -18,8 +24,15 @@ tasks:
       - sed -i 's/static\/css\//static\/admincss\//g' admin/build/index.html
     silent: true
 
+  login:
+    deps: [login_build]
+    cmds:
+      - sed -i 's/static\/js\//static\/loginjs\//g' login/build/index.html
+      - sed -i 's/static\/css\//static\/logincss\//g' login/build/index.html
+    silent: true
+
   all:
-    deps: [client, admin]
+    deps: [client, admin, login]
 
   admin_update:
     dir: admin
