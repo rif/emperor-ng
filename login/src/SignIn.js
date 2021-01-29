@@ -47,71 +47,94 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function SignIn() {
-  const classes = useStyles();
+    const classes = useStyles();
+    const [email, setEmail] = React.useState('');
+    const [pass, setPass] = React.useState('');
 
-  return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Sign in
+    const handleSubmit = () => {
+        fetch(`/login?csrf=${window.csrf}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email: email, pass: pass })
+        })
+            .then(response => response.text())
+            .then(text => {
+                /*if (text === "OK") {
+                  window.location.href = "/admin";
+                } else {
+                    this.snackbar = true;
+                    }*/
+            });
+    };
+
+    return (
+            <Container component="main" maxWidth="xs">
+            <CssBaseline />
+            <div className={classes.paper}>
+            <Avatar className={classes.avatar}>
+            <LockOutlinedIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+            Sign in
         </Typography>
-        <form className={classes.form} noValidate>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
-          />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-          />
-          <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
+            <form className={classes.form} noValidate>
+            <TextField
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        variant="outlined"
+        margin="normal"
+        required
+        fullWidth
+        id="email"
+        label="Email Address"
+        name="email"
+        autoComplete="email"
+        autoFocus
+            />
+            <TextField
+        value={pass}
+        onChange={e => setPass(e.target.value)}
+        variant="outlined"
+        margin="normal"
+        required
+        fullWidth
+        name="password"
+        label="Password"
+        type="password"
+        id="password"
+        autoComplete="current-password"
+            />
+            <FormControlLabel
+        control={<Checkbox value="remember" color="primary" />}
+        label="Remember me"
+            />
+            <Button onClick={handleSubmit}
+        fullWidth
+        variant="contained"
+        color="primary"
+        className={classes.submit}
+            >
             Sign In
-          </Button>
-          <Grid container>
+        </Button>
+            <Grid container>
             <Grid item xs>
-              <Link href="#" variant="body2">
-                Forgot password?
-              </Link>
+            <Link href="#" variant="body2">
+            Forgot password?
+            </Link>
             </Grid>
             <Grid item>
-              <Link href="#" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
+            <Link href="#" variant="body2">
+            {"Don't have an account? Sign Up"}
+        </Link>
             </Grid>
           </Grid>
-        </form>
+            </form>
       </div>
-      <Box mt={8}>
-        <Copyright />
-      </Box>
+            <Box mt={8}>
+            <Copyright />
+            </Box>
     </Container>
-  );
+    );
 }
