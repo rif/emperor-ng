@@ -84,12 +84,7 @@ func main() {
 
 	e.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
 		Skipper: func(c echo.Context) bool {
-			if c.Request().URL.Path == "/server/payment" ||
-				c.Request().URL.Path == "/server/newshipment" ||
-				c.Request().URL.Path == "/server/neworder" ||
-				c.Request().URL.Path == "/server/newecomorder" ||
-				c.Request().URL.Path == "/server/shopifyorder" ||
-				c.Request().URL.Path == "/server/shopifyproduct" {
+			if c.Request().URL.Path == "/server/payment" {
 				return true
 			}
 			if email := authManager.GetKeyAuth(c); email != "" {
@@ -100,12 +95,6 @@ func main() {
 		TokenLookup: "query:csrf",
 		CookiePath:  "/",
 	}))
-	e.GET("/client", func(c echo.Context) error {
-		return c.Render(http.StatusOK, "index", map[string]interface{}{
-			"User": c.Get("email"),
-			"CSRF": c.Get(middleware.DefaultCSRFConfig.ContextKey),
-		})
-	})
 
 	// login
 	e.GET("/login", authManager.LoginHandler)
@@ -137,14 +126,6 @@ func main() {
 	a.POST("/key", keys.PostHandler)
 	a.DELETE("/key", keys.DeleteHandler)
 
-	e.Static("/favicon.ico", "web/favicon.ico")
-	e.Static("/static/js", "client/build/static/js")
-	e.Static("/static/css", "client/build/static/css")
-	e.Static("/static/adminjs", "admin/build/static/js")
-	e.Static("/static/admincss", "admin/build/static/css")
-	e.Static("/static/loginjs", "login/build/static/js")
-	e.Static("/static/logincss", "login/build/static/css")
-
 	dbg := e.Group("/debug")
 	dbg.GET("/pprof/*", func(c echo.Context) error {
 		w := c.Response()
@@ -154,6 +135,26 @@ func main() {
 			return nil
 		}
 		return echo.NewHTTPError(http.StatusNotFound)
+	})
+
+	e.File("/favicon.ico", "web/favicon.ico")
+	e.File("/manifest.json", "web/manifest.json")
+	e.File("/robots.txt", "web/robots.txt")
+	e.File("/logo192.png", "web/logo192.png")
+	e.File("/logo512.png", "web/logo512.png")
+	e.Static("/static/js", "client/build/static/js")
+	e.Static("/static/css", "client/build/static/css")
+	e.Static("/static/adminjs", "admin/build/static/js")
+	e.Static("/static/admincss", "admin/build/static/css")
+	e.Static("/static/loginjs", "login/build/static/js")
+	e.Static("/static/logincss", "login/build/static/css")
+
+	l.GET("/", func(c echo.Context) error {
+		log.Info().Msg("INDEX")
+		return c.Render(http.StatusOK, "index", map[string]interface{}{
+			"User": c.Get("email"),
+			"CSRF": c.Get(middleware.DefaultCSRFConfig.ContextKey),
+		})
 	})
 
 	log.Fatal().Err(e.Start(*port)).Msg("could not start web server")
