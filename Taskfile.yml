@@ -44,9 +44,15 @@ tasks:
       client
     cmds:
       - npm update
+
+  login_update:
+    dir:
+      login
+    cmds:
+      - npm update      
       
   up:
-    deps: [admin_update, client_update]
+    deps: [admin_update, client_update, login_update]
 
   build:
     cmds:
