@@ -2,11 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
+import Dashboard from './dashboard/Dashboard';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+        <Dashboard />
+        </React.StrictMode>,
+    document.getElementById('root')
 );
 

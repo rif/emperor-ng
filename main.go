@@ -1,7 +1,7 @@
 package main
 
 import (
-	"emperor-ng/engine"
+	"emperor-ng/auth"
 	"errors"
 	"flag"
 	"fmt"
@@ -62,10 +62,13 @@ func main() {
 	}
 	defer db.Close()
 
-	auth, err := engine.NewAuthManager(db)
+	authManager, err := auth.NewManager(db)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot init auth")
 	}
+
+	keys := auth.NewKeys(db)
+	users := auth.NewUsers(db)
 
 	t := &templ{
 		templates: make(map[string]*template.Template),
@@ -89,7 +92,7 @@ func main() {
 				c.Request().URL.Path == "/server/shopifyproduct" {
 				return true
 			}
-			if email := auth.GetKeyAuth(c); email != "" {
+			if email := authManager.GetKeyAuth(c); email != "" {
 				return true
 			}
 			return false
@@ -105,12 +108,12 @@ func main() {
 	})
 
 	// login
-	e.GET("/login", auth.LoginHandler)
-	e.POST("/login", auth.LoginPostHandler)
-	e.GET("/logout", auth.LogoutHandler)
+	e.GET("/login", authManager.LoginHandler)
+	e.POST("/login", authManager.LoginPostHandler)
+	e.GET("/logout", authManager.LogoutHandler)
 
 	l := e.Group("")
-	l.Use(auth.AuthMiddleware)
+	l.Use(authManager.AuthMiddleware)
 
 	l.GET("/admin", func(c echo.Context) error {
 		return c.Render(http.StatusOK, "admin", map[string]interface{}{
@@ -122,20 +125,17 @@ func main() {
 		})
 	})
 	a := l.Group("/adm")
-	a.Use(auth.AdminMiddleware)
+	a.Use(authManager.AdminMiddleware)
 
 	// users
-	a.GET("/users", auth.UsersHandler)
-	a.POST("/user", auth.UserPostHandler)
-	a.DELETE("/user", auth.UserDeleteHandler)
-
-	// influencers
-	a.GET("/influencers", auth.InfluencersHandler)
+	a.GET("/users", users.GetHandler)
+	a.POST("/user", users.PostHandler)
+	a.DELETE("/user", users.DeleteHandler)
 
 	// keys
-	a.GET("/keys", auth.KeysHandler)
-	a.POST("/key", auth.KeyPostHandler)
-	a.DELETE("/key", auth.KeyDeleteHandler)
+	a.GET("/keys", keys.GetHandler)
+	a.POST("/key", keys.PostHandler)
+	a.DELETE("/key", keys.DeleteHandler)
 
 	e.Static("/favicon.ico", "web/favicon.ico")
 	e.Static("/static/js", "client/build/static/js")
