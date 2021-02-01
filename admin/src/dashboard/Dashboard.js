@@ -19,18 +19,35 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { mainListItems, secondaryListItems } from './listItems';
+import {
+    BrowserRouter as Router,
+    Switch,
+    Route
+} from "react-router-dom";
 
 function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://material-ui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
+    return (
+            <Typography variant="body2" color="textSecondary" align="center">
+            {'Copyright © '}
+        <Link color="inherit" href="https://material-ui.com/">
+            Emperor
+        </Link>{' '}
+        {new Date().getFullYear()}
+        {'.'}
+        </Typography>
   );
+}
+
+function Home() {
+    return <h2>Home</h2>;
+}
+
+function About() {
+    return <h2>About</h2>;
+}
+
+function Users() {
+    return <h2>Users</h2>;
 }
 
 const drawerWidth = 240;
@@ -148,8 +165,9 @@ export default function Dashboard() {
             </Badge>
           </IconButton>
         </Toolbar>
-      </AppBar>
-      <Drawer
+          </AppBar>
+          <Router>
+          <Drawer
         variant="permanent"
         classes={{
           paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
@@ -162,20 +180,35 @@ export default function Dashboard() {
           </IconButton>
         </div>
         <Divider />
-        <List>{mainListItems}</List>
-        <Divider />
-        <List>{secondaryListItems}</List>
-      </Drawer>
-      <main className={classes.content}>
-        <div className={classes.appBarSpacer} />
-        <Container maxWidth="lg" className={classes.container}>
+          <List>{mainListItems}</List>
+          </Drawer>
+          <main className={classes.content}>
+          <div className={classes.appBarSpacer} />
+          <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>
+          {/* Chart */}
+          <Grid item xs={12} md={8} lg={9}>
+          <Paper className={fixedHeightPaper}>
+          <Switch>
+          <Route path="/about">
+          <About />
+          </Route>
+          <Route path="/users">
+          <Users />
+          </Route>
+          <Route path="/admin">
+          <Home />
+          </Route>
+          </Switch>
+          </Paper>
+          </Grid>
           </Grid>
           <Box pt={4}>
-            <Copyright />
+          <Copyright />
           </Box>
         </Container>
-      </main>
-    </div>
+          </main>
+          </Router>
+          </div>
   );
 }
