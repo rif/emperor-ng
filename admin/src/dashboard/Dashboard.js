@@ -170,8 +170,7 @@ export default function Dashboard() {
         <div className={classes.appBarSpacer} />
         <Container maxWidth="lg" className={classes.container}>
           <Grid container spacing={3}>
-          
-      </Grid>
+          </Grid>
           <Box pt={4}>
             <Copyright />
           </Box>
