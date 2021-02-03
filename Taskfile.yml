@@ -77,12 +77,14 @@ tasks:
   local_deploy:
     deps: [local_build]
     cmds:
-      - rm -rf ../deploy
-      - mkdir ../deploy
-      - mkdir ../deploy/admin
-      - mkdir ../deploy/login
-      - mkdir ../deploy/client
-      - cp -r admin/build ../deploy/admin/
-      - cp -r login/build ../deploy/login/
-      - cp -r client/build ../deploy/client/
-      - cp emperor ../deploy
+      - rm -rf {{.DEPLOY_DIR}}
+      - mkdir {{.DEPLOY_DIR}}
+      - mkdir {{.DEPLOY_DIR}}/admin
+      - mkdir {{.DEPLOY_DIR}}/login
+      - mkdir {{.DEPLOY_DIR}}/client
+      - cp -r admin/build {{.DEPLOY_DIR}}/admin/
+      - cp -r login/build {{.DEPLOY_DIR}}/login/
+      - cp -r client/build {{.DEPLOY_DIR}}/client/
+      - cp emperor {{.DEPLOY_DIR}}
+    vars:
+      DEPLOY_DIR: ../emperor_deploy
