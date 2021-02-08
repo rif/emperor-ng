@@ -31,7 +31,7 @@ tasks:
       - sed -i 's/static\/css\//static\/logincss\//g' login/build/index.html
     silent: true
 
-  all:
+  default:
     deps: [client, admin, login]
 
   admin_update:

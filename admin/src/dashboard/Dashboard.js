@@ -24,6 +24,7 @@ import {
     Switch,
     Route
 } from "react-router-dom";
+import Users from '../Users';
 
 function Copyright() {
     return (
@@ -44,10 +45,6 @@ function Home() {
 
 function About() {
     return <h2>About</h2>;
-}
-
-function Users() {
-    return <h2>Users</h2>;
 }
 
 const drawerWidth = 240;
