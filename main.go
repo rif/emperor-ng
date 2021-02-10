@@ -69,6 +69,7 @@ func main() {
 
 	keys := auth.NewKeys(db)
 	users := auth.NewUsers(db)
+	groups := auth.NewGroups(db)
 
 	t := &templ{
 		templates: make(map[string]*template.Template),
@@ -120,6 +121,11 @@ func main() {
 	a.GET("/users", users.GetHandler)
 	a.POST("/user", users.PostHandler)
 	a.DELETE("/user", users.DeleteHandler)
+
+	// groups
+	a.GET("/groups", groups.GetHandler)
+	a.POST("/group", groups.PostHandler)
+	a.DELETE("/group", groups.DeleteHandler)
 
 	// keys
 	a.GET("/keys", keys.GetHandler)

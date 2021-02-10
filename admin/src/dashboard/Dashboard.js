@@ -18,7 +18,7 @@ import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import { mainListItems } from "./listItems";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import Users from "../users/Users";
+import Auth from "../users/Auth";
 
 function Copyright() {
   return (
@@ -185,7 +185,7 @@ export default function Dashboard() {
                     <About />
                   </Route>
                   <Route path="/users">
-                    <Users />
+                    <Auth />
                   </Route>
                   <Route path="/admin">
                     <Home />

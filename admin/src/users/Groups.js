@@ -1,32 +1,26 @@
 import * as React from "react";
 import { DataGrid } from "@material-ui/data-grid";
-import FormDialog from "./CreateUserDialog";
+import FormDialog from "./CreateGroupDialog";
 import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 
-export default function Users() {
-  const [users, setUsers] = React.useState([]);
+export default function Groups() {
+  const [groups, setGroups] = React.useState([]);
   const [showDialog, setShowDialog] = React.useState(false);
-  const [editedUser, setEditedUser] = React.useState({
+  const [editedGroup, setEditedGroup] = React.useState({
     id: "",
-    email: "",
-    firstName: "",
-    lastName: "",
-    phone: "",
+    name: "",
   });
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
-    { field: "email", headerName: "Email", width: 190 },
-    { field: "firstName", headerName: "FirstName", width: 180 },
-    { field: "lastName", headerName: "LastName", width: 180 },
-    { field: "phone", headerName: "Phone", width: 120 },
+    { field: "id", headerName: "ID", width: 70 },
+    { field: "name", headerName: "Name", width: 100 },
     {
       field: "",
       headerName: "Actions",
       sortable: false,
-      width: 110,
+      width: 105,
       disableClickEventBubbling: true,
       renderCell: (params) => {
         const onClick = (callback) => {
@@ -44,13 +38,12 @@ export default function Users() {
           return callback(thisRow);
         };
         const edit = (row) => {
-          setEditedUser(row);
+          setEditedGroup(row);
           setShowDialog(true);
         };
         const remove = (row) => {
-          handleRemoveUser(row);
+          handleRemoveGroup(row);
         };
-
         return [
           <IconButton
             aria-label="delete"
@@ -76,95 +69,91 @@ export default function Users() {
     },
   ];
 
-  const handleEditUser = (user) => {
-    fetch(`/adm/user?csrf=${window.csrf}`, {
+  const handleEditGroup = (group) => {
+    fetch(`/adm/group?csrf=${window.csrf}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        phone: user.phone,
-        password: user.pass,
+        id: group.id,
+        name: group.name,
       }),
     })
       .then((resp) => resp.text())
       .then((text) => {
-        user.pass = "";
-        user.id = text;
-        const newUsers = [...users];
+        group.pass = "";
+        group.id = text;
+        const newGroups = [...groups];
         let found = false;
-        for (let i = 0; i < newUsers.length; i++) {
-          if (newUsers[i].id === user.id) {
-            newUsers[i] = user;
+        for (let i = 0; i < newGroups.length; i++) {
+          if (newGroups[i].id === group.id) {
+            newGroups[i] = group;
             found = true;
             break;
           }
         }
         if (!found) {
-          newUsers.push(user);
+          newGroups.push(group);
         }
-        setUsers(newUsers);
+        setGroups(newGroups);
       });
   };
 
-  const handleRemoveUser = (user) => {
-    if (window.confirm("Are you soure you want to delete this user?")) {
-      const newUsers = [...users];
+  const handleRemoveGroup = (group) => {
+    if (window.confirm("Are you soure you want to delete this group?")) {
+      const newGroups = [...groups];
       let index = -1;
-      for (let i = 0; i < newUsers.length; i++) {
-        if (newUsers[i].id === user.id) {
+      for (let i = 0; i < newGroups.length; i++) {
+        if (newGroups[i].id === group.id) {
           index = i;
           break;
         }
       }
       if (index > -1) {
-        newUsers.splice(index, 1);
-        console.log("delete user: ", JSON.stringify(user), index);
-        fetch(`/adm/user?csrf=${window.csrf}`, {
+        newGroups.splice(index, 1);
+        console.log("delete group: ", JSON.stringify(group), index);
+        fetch(`/adm/group?csrf=${window.csrf}`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(user),
+          body: JSON.stringify(group),
         })
           .then((resp) => {
             if (resp.status === 200) {
-              setUsers(newUsers);
+              setGroups(newGroups);
             } else {
-              alert("Could not delete user!");
+              alert("Could not delete group!");
             }
           })
           .catch((err) => {
-            alert("error deleting user: " + err);
+            alert("error deleting group: " + err);
           });
       }
     }
   };
 
   React.useEffect(() => {
-    fetch("/adm/users")
+    fetch("/adm/groups")
       .then((response) => response.json())
       .then((json) => {
-        setUsers(json.items);
+        setGroups(json.items);
       });
   }, []);
   return (
     <Grid container spacing={2}>
       <Grid item justify="flex-end" xs={12}>
         <FormDialog
-          user={editedUser}
+          group={editedGroup}
           status={showDialog}
-          editUserCallback={handleEditUser}
+          editGroupCallback={handleEditGroup}
         />
       </Grid>
       <Grid item xs={12}>
         <div style={{ height: 300, width: "100%" }}>
           <DataGrid
-            rows={users}
+            rows={groups}
             columns={columns}
             pageSize={5}
             density="compact"

@@ -6,7 +6,7 @@ import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 
-export default function Users() {
+export default function UserGroups() {
   const [users, setUsers] = React.useState([]);
   const [showDialog, setShowDialog] = React.useState(false);
   const [editedUser, setEditedUser] = React.useState({
@@ -17,16 +17,16 @@ export default function Users() {
     phone: "",
   });
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
-    { field: "email", headerName: "Email", width: 190 },
-    { field: "firstName", headerName: "FirstName", width: 180 },
-    { field: "lastName", headerName: "LastName", width: 180 },
+    { field: "id", headerName: "ID", width: 200 },
+    { field: "email", headerName: "Email", width: 200 },
+    { field: "firstName", headerName: "FirstName", width: 200 },
+    { field: "lastName", headerName: "LastName", width: 200 },
     { field: "phone", headerName: "Phone", width: 120 },
     {
       field: "",
       headerName: "Actions",
       sortable: false,
-      width: 110,
+      width: 200,
       disableClickEventBubbling: true,
       renderCell: (params) => {
         const onClick = (callback) => {
@@ -163,12 +163,7 @@ export default function Users() {
       </Grid>
       <Grid item xs={12}>
         <div style={{ height: 300, width: "100%" }}>
-          <DataGrid
-            rows={users}
-            columns={columns}
-            pageSize={5}
-            density="compact"
-          />
+          <DataGrid rows={users} columns={columns} pageSize={5} />
         </div>
       </Grid>
     </Grid>
