@@ -7,17 +7,18 @@ import (
 	"github.com/asdine/storm/v3"
 	"github.com/asdine/storm/v3/q"
 	"github.com/labstack/echo/v4"
+	"github.com/nats-io/nuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
-	ID        int    `storm:"id,increment" json:"id"` // primary key
-	Group     string `storm:"index" json:"group"`
-	Email     string `storm:"unique" json:"email"`
-	Phone     string `storm:"index" json:"phone"`
-	FirstName string `storm:"index" json:"firstName"`
-	LastName  string `storm:"index" json:"lastName"`
-	Password  string `json:"password"`
+	ID           string `storm:"id,increment" json:"id"` // primary key
+	DefaultGroup string `storm:"index" json:"defaultGroup"`
+	Email        string `storm:"unique" json:"email"`
+	Phone        string `storm:"index" json:"phone"`
+	FirstName    string `storm:"index" json:"firstName"`
+	LastName     string `storm:"index" json:"lastName"`
+	Password     string `json:"password"`
 }
 
 type Users struct {
@@ -29,7 +30,7 @@ func NewUsers(db *storm.DB) *Users {
 }
 
 func (us *Users) GetHandler(c echo.Context) error {
-	var users []*User
+	var users []User
 	if err := us.db.All(&users); err != nil {
 		return err
 	}
@@ -40,6 +41,7 @@ func (us *Users) GetHandler(c echo.Context) error {
 	response := map[string]interface{}{
 		"items": users,
 	}
+
 	return c.JSON(http.StatusOK, response)
 }
 
@@ -56,17 +58,20 @@ func (us *Users) PostHandler(c echo.Context) error {
 		u.Password = string(hash)
 	} else {
 		// get previous password
-		if u.ID != 0 {
+		if u.ID != "" {
 			oldUser := &User{}
 			if err := us.db.One("ID", u.ID, oldUser); err == nil {
 				u.Password = oldUser.Password
 			}
 		}
 	}
+	if u.ID == "" {
+		u.ID = nuid.Next()
+	}
 	if err := us.db.Save(u); err != nil {
 		return err
 	}
-	return c.NoContent(http.StatusOK)
+	return c.String(http.StatusOK, u.ID)
 }
 
 func (us *Users) DeleteHandler(c echo.Context) error {
@@ -78,7 +83,7 @@ func (us *Users) DeleteHandler(c echo.Context) error {
 		return err
 	}
 	// delete associated keys
-	if err := us.db.Select(q.Eq("Email", u.Email)).Delete(new(Key)); err != nil {
+	if err := us.db.Select(q.Eq("ID", u.ID)).Delete(new(Key)); err != nil && err != storm.ErrNotFound {
 		return err
 	}
 

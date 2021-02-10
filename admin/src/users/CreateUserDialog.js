@@ -7,14 +7,22 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 
-export default function FormDialog() {
-  const [open, setOpen] = React.useState(false);
-  const [id, setId] = React.useState("");
-  const [email, setEmail] = React.useState("");
-  const [firstName, setFirstName] = React.useState("");
-  const [lastName, setLastName] = React.useState("");
-  const [phone, setPhone] = React.useState("");
-  const [pass, setPass] = React.useState("");
+export default function FormDialog({ user, status, editUserCallback }) {
+  const defaultUser = {
+    id: "",
+    email: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
+  };
+  const [open, setOpen] = React.useState(status);
+  const [editedUser, setEditedUser] = React.useState({
+    id: user.id,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    phone: user.phone,
+  });
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -22,35 +30,19 @@ export default function FormDialog() {
 
   const handleClose = () => {
     setOpen(false);
+    setEditedUser(defaultUser);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetch(`/adm/user?csrf=${window.csrf}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: email,
-        firstName: firstName,
-        lastName: lastName,
-        phone: phone,
-        password: pass,
-      }),
-    })
-      .then((response) => response.text())
-      .then((text) => {
-        setPass("");
-        setId(text);
-        /*if (this.editedIndex > -1) {
-                Object.assign(this.items[this.editedIndex], this.editedItem);
-        } else {
-          this.items.push(this.editedItem);
-          }*/
-      });
-    setOpen(false);
+    editUserCallback(editedUser);
+    handleClose();
   };
+
+  React.useEffect(() => {
+    setEditedUser(user);
+    setOpen(status);
+  }, [user, status]);
 
   return (
     <div>
@@ -70,16 +62,26 @@ export default function FormDialog() {
               autoFocus
               margin="dense"
               id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={editedUser.email}
+              onChange={(e) =>
+                setEditedUser({
+                  ...editedUser,
+                  ["email"]: e.target.value,
+                })
+              }
               label="Email Address"
               type="email"
               fullWidth
             />
             <TextField
               margin="dense"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              value={editedUser.firstName}
+              onChange={(e) =>
+                setEditedUser({
+                  ...editedUser,
+                  ["firstName"]: e.target.value,
+                })
+              }
               id="firstName"
               label="FirstName"
               type="text"
@@ -87,8 +89,13 @@ export default function FormDialog() {
             />
             <TextField
               margin="dense"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              value={editedUser.lastName}
+              onChange={(e) =>
+                setEditedUser({
+                  ...editedUser,
+                  ["lastName"]: e.target.value,
+                })
+              }
               id="lastName"
               label="LastName"
               type="text"
@@ -96,15 +103,25 @@ export default function FormDialog() {
             />
             <TextField
               margin="dense"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              value={editedUser.phone}
+              onChange={(e) =>
+                setEditedUser({
+                  ...editedUser,
+                  ["phone"]: e.target.value,
+                })
+              }
               label="Phone"
               type="text"
               fullWidth
             />
             <TextField
               margin="dense"
-              onChange={(e) => setPass(e.target.value)}
+              onChange={(e) =>
+                setEditedUser({
+                  ...editedUser,
+                  ["pass"]: e.target.value,
+                })
+              }
               label="Pass"
               type="password"
               fullWidth

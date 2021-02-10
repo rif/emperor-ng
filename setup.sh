@@ -1,7 +1,6 @@
 #! /usr/bin/env sh
 
-apk update
-apk add wget
+apk add --no-cache git make musl-dev go wget
 cd /tmp
 wget https://github.com/go-task/task/releases/download/v3.2.2/task_linux_amd64.tar.gz
 tar xvf task_linux_amd64.tar.gz

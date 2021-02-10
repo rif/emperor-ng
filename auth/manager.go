@@ -9,6 +9,7 @@ import (
 	"github.com/asdine/storm/v3"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/nats-io/nuid"
 	"github.com/rif/cache2go"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
@@ -17,7 +18,8 @@ import (
 const (
 	CookieSession = "session"
 	CookieSecret  = "jiihie8Aeleechoo4day5nohl8eex2iezaengiXiecaic4ei8daD6yoo6keeWusu"
-	GroupAdmin    = "admin"
+	GroupAdmins   = "admins"
+	GroupUsers    = "users"
 )
 
 type Manager struct {
@@ -59,23 +61,40 @@ func (am *Manager) GetKeyAuth(c echo.Context) string {
 
 func (am *Manager) initAuth() error {
 	var users []User
-	err := am.db.All(&users)
 
-	hash, err := bcrypt.GenerateFromPassword([]byte("testus"), bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
-
-	if err == storm.ErrNotFound || len(users) == 0 {
+	if err := am.db.All(&users); err == storm.ErrNotFound || len(users) == 0 {
+		hash, err := bcrypt.GenerateFromPassword([]byte("testus"), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
 		if err := am.db.Save(&User{
-			Email:    "admin@mailinator.com",
-			Password: string(hash),
-			Group:    GroupAdmin,
+			ID:           nuid.Next(),
+			Email:        "admin@mailinator.com",
+			Password:     string(hash),
+			DefaultGroup: GroupAdmins,
 		}); err != nil {
 			return err
 		}
 	}
-	return err
+
+	var groups []Group
+	if err := am.db.All(&groups); err == storm.ErrNotFound || len(users) == 0 {
+		if err := am.db.Save(&Group{
+			ID:      nuid.Next(),
+			Name:    GroupAdmins,
+			Primary: true,
+		}); err != nil {
+			return err
+		}
+		if err := am.db.Save(&Group{
+			ID:      nuid.Next(),
+			Name:    GroupUsers,
+			Primary: true,
+		}); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (am *Manager) EmailForKey(uuid string) string {
@@ -119,7 +138,7 @@ func (am *Manager) AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 func (am *Manager) AdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		group, ok := c.Get("group").(string)
-		if !ok || group != GroupAdmin {
+		if !ok || group != GroupAdmins {
 			log.Warn().Interface("email", c.Get("email")).Interface("group", c.Get("group")).Msg("admin access")
 			return c.NoContent(http.StatusForbidden)
 		}
@@ -168,7 +187,7 @@ func (am *Manager) LoginPostHandler(c echo.Context) error {
 	am.db.Save(&Session{
 		Key:   cookie,
 		Email: credentials.Email,
-		Group: u.Group,
+		Group: u.DefaultGroup,
 	})
 	return c.String(http.StatusOK, "OK")
 }
