@@ -89,3 +89,21 @@ func (us *Users) DeleteHandler(c echo.Context) error {
 
 	return c.NoContent(http.StatusOK)
 }
+
+func (us *Users) ToggleAdminHandler(c echo.Context) error {
+	userID := c.Param("user")
+	u := new(User)
+	if err := us.db.One("ID", userID, u); err != nil {
+		return err
+	}
+	var newGroup string
+	if u.DefaultGroup == GroupUsers {
+		newGroup = GroupAdmins
+	} else {
+		newGroup = GroupUsers
+	}
+	if err := us.db.UpdateField(u, "DefaultGroup", newGroup); err != nil {
+		return err
+	}
+	return c.String(http.StatusOK, newGroup)
+}

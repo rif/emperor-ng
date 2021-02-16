@@ -15,12 +15,6 @@ type Group struct {
 	Primary bool   `storm:"index" json:"primary"`
 }
 
-type UserGroup struct {
-	ID      string `storm:"id" json:"id"` // primary key
-	UserID  string `storm:"index" json:"userId"`
-	GroupID string `storm:"index" json:"groupId"`
-}
-
 type Groups struct {
 	db *storm.DB
 }
@@ -48,6 +42,7 @@ func (gs *Groups) PostHandler(c echo.Context) error {
 	}
 	if g.ID == "" {
 		g.ID = nuid.Next()
+		g.Primary = false
 	}
 	if err := gs.db.Save(g); err != nil {
 		return err
@@ -63,7 +58,7 @@ func (gs *Groups) DeleteHandler(c echo.Context) error {
 	if err := gs.db.DeleteStruct(g); err != nil {
 		return err
 	}
-	// remove user bindings
+	// remove user groups
 	if err := gs.db.Select(q.Eq("GroupID", g.ID)).Delete(new(UserGroup)); err != nil && err != storm.ErrNotFound {
 		return err
 	}
