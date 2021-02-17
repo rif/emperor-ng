@@ -2,6 +2,7 @@ package main
 
 import (
 	"emperor-ng/auth"
+	"emperor-ng/commands"
 	"errors"
 	"flag"
 	"fmt"
@@ -70,7 +71,9 @@ func main() {
 	keys := auth.NewKeys(db)
 	users := auth.NewUsers(db)
 	groups := auth.NewGroups(db)
-	ug := auth.NewUserGroup(db)
+	ug := auth.NewUserGroups(db)
+	cmds := commands.NewCommands(db)
+	cg := commands.NewCommandGroups(db)
 
 	t := &templ{
 		templates: make(map[string]*template.Template),
@@ -132,6 +135,15 @@ func main() {
 	// usergroups
 	a.GET("/usergroups/:user", ug.GetHandler)
 	a.POST("/usergroup/:user", ug.PostHandler)
+
+	// commands
+	a.GET("/commands", cmds.GetHandler)
+	a.POST("/command", cmds.PostHandler)
+	a.DELETE("/command", cmds.DeleteHandler)
+
+	// commandsgroups
+	a.GET("/commandgroups/:command", cg.GetHandler)
+	a.POST("/commandgroup/:command", cg.PostHandler)
 
 	// keys
 	a.GET("/keys", keys.GetHandler)
