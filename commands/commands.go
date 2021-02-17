@@ -3,19 +3,27 @@ package commands
 import (
 	"emperor-ng/auth"
 	"emperor-ng/utils"
+	"fmt"
 	"net/http"
 
 	"github.com/asdine/storm/v3"
 	"github.com/asdine/storm/v3/q"
 	"github.com/labstack/echo/v4"
 	"github.com/nats-io/nuid"
+	"github.com/rs/zerolog/log"
 )
 
 type Command struct {
 	ID          string `storm:"id" json:"id"`
 	Cmd         string `json:"cmd"`
+	Params      string `json:"params"`
 	Description string `storm:"index" json:"description"`
 	Danger      bool   `json:"danger"`
+}
+
+func (c *Command) Execute() (string, error) {
+	log.Info().Str("execute", fmt.Sprintf(c.Cmd, c.Params)).Send()
+	return "", nil
 }
 
 type Commands struct {

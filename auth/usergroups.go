@@ -44,7 +44,7 @@ func (ugs *UserGroups) GetHandler(c echo.Context) error {
 			groupsNoPrimary = append(groupsNoPrimary, g)
 		}
 	}
-
+	//TODO:  add longing on all POST handlers
 	response := map[string]interface{}{
 		"items":  groupIDs,
 		"groups": groupsNoPrimary,
