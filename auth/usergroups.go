@@ -6,6 +6,7 @@ import (
 	"github.com/asdine/storm/v3"
 	"github.com/labstack/echo/v4"
 	"github.com/nats-io/nuid"
+	"github.com/rs/zerolog/log"
 )
 
 type UserGroup struct {
@@ -44,7 +45,7 @@ func (ugs *UserGroups) GetHandler(c echo.Context) error {
 			groupsNoPrimary = append(groupsNoPrimary, g)
 		}
 	}
-	//TODO:  add longing on all POST handlers
+
 	response := map[string]interface{}{
 		"items":  groupIDs,
 		"groups": groupsNoPrimary,
@@ -100,5 +101,8 @@ func (ugs *UserGroups) PostHandler(c echo.Context) error {
 			}
 		}
 	}
+	//TODO:  add longing on all POST handlers
+	log.Info().Str("userID", userID).Interface("email", c.Get("email")).Strs("new", data.NewGroups).Msg("changed user groups")
+
 	return c.NoContent(http.StatusOK)
 }

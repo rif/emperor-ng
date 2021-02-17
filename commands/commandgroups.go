@@ -7,6 +7,7 @@ import (
 	"github.com/asdine/storm/v3"
 	"github.com/labstack/echo/v4"
 	"github.com/nats-io/nuid"
+	"github.com/rs/zerolog/log"
 )
 
 type CommandGroup struct {
@@ -101,5 +102,6 @@ func (cgs *CommandGroups) PostHandler(c echo.Context) error {
 			}
 		}
 	}
+	log.Info().Str("commandID", commandID).Interface("email", c.Get("email")).Strs("new", data.NewGroups).Msg("changed command groups")
 	return c.NoContent(http.StatusOK)
 }
