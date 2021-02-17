@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function UserGroupsDialog({ user, groups, allGroups }) {
+export default function HostGroupsDialog({ host, groups, allGroups }) {
     const classes = useStyles();
     const [checked, setChecked] = React.useState([]);
     const [showDialog, setShowDialog] = React.useState(false);
@@ -45,7 +45,7 @@ export default function UserGroupsDialog({ user, groups, allGroups }) {
     };
 
     const handleSubmit = () => {
-        fetch(`/adm/usergroup/${user.id}?csrf=${window.csrf}`, {
+        fetch(`/adm/hostgroup/${host.id}?csrf=${window.csrf}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -54,15 +54,15 @@ export default function UserGroupsDialog({ user, groups, allGroups }) {
         }).then((resp) => {
             setShowDialog(false);
             if (resp.status !== 200) {
-                alert("Could not set user groups!");
+                alert("Could not set host groups!");
             }
         });
     };
 
     React.useEffect(() => {
         setChecked(groups);
-        setShowDialog(user.id !== '');
-    }, [groups, user, allGroups]);
+        setShowDialog(host.id !== '');
+    }, [groups,allGroups]);
 
     return (
         <Dialog aria-labelledby="simple-dialog-title" open={showDialog} onClose={handleClose}>
@@ -106,7 +106,7 @@ export default function UserGroupsDialog({ user, groups, allGroups }) {
     );
 }
 
-UserGroupsDialog.propTypes = {
+HostGroupsDialog.propTypes = {
     open: PropTypes.bool.isRequired,
     groups: PropTypes.array.isRequired,
     allGroups: PropTypes.array.isRequired,

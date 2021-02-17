@@ -6,19 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"hash/fnv"
-	"math"
 	"math/rand"
-	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 	"unicode"
 	"unicode/utf8"
-
-	"github.com/rs/zerolog/log"
-	"github.com/shopspring/decimal"
-	"github.com/tidwall/gjson"
 )
 
 var (
@@ -31,14 +25,7 @@ var (
 )
 
 const (
-	ErrCodeMultipleOrders             = 1
-	ErrCodeQuantityExceeded           = 2
-	ErrCodeUpdateFailed               = 3
-	ErrCodeItemNotFound               = 4
-	charset                           = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	GoogleMerchantSaleOMapping        = "GoogleMerchant"
-	merchantID                 uint64 = 214996785
-	timeFormat                        = "2006-01-02T15:04:05-07:00"
+	charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
 
 type Elem struct {
@@ -51,43 +38,7 @@ type KeySecret struct {
 	Secret string `json:"refresh_token"`
 }
 
-type Mapper struct {
-	DescToMatrix map[string]*Elem `json:"descToMatrix"` // desc -> (matrix.desc,matrix.id)
-	Abort        bool             `json:"abort"`        // exiting order found
-}
-
-type Inventory struct {
-	OrderID  string   `json:"orderID"`
-	ItemDesc string   `json:"itemDesc"`
-	Quantity int      `json:"quantity"`
-	Received int      `json:"received"`
-	Images   []string `json:"images"`
-}
-
-type Options struct {
-	Page         int      `json:"page"`
-	Brands       []string `json:"brands"`
-	Filter       string   `json:"filter"`
-	ItemsPerPage int      `json:"itemsPerPage"`
-	SortBy       []string `json:"sortBy"`
-	SortDesc     []bool   `json:"sortDesc"`
-	GroupBy      []string `json:"groupBy"`
-	GroupDesc    []bool   `json:"groupDesc"`
-	MultiSort    bool     `json:"multiSort"`
-	MustSort     bool     `json:"mustSort"`
-	Search       string   `json:"search"`
-}
-
-type Enabler struct {
-	Description bool `json:"description"`
-	CategoryObj bool `json:"categoryObj"`
-	BrandObj    bool `json:"brandObj"`
-	Msrp        bool `json:"msrp"`
-	Notes       bool `json:"notes"`
-	LongDesc    bool `json:"longDesc"`
-}
-
-func randomString(length int) string {
+func RandomString(length int) string {
 	b := make([]byte, length)
 	for i := range b {
 		b[i] = charset[seededRand.Intn(len(charset))]
@@ -95,7 +46,7 @@ func randomString(length int) string {
 	return string(b)
 }
 
-func hash(attrs ...interface{}) string {
+func Hash(attrs ...interface{}) string {
 	for _, attr := range attrs {
 		if attr == nil {
 			continue
@@ -119,7 +70,7 @@ func Sha1(attrs ...interface{}) string {
 	return fmt.Sprintf("%x", sha1Hash.Sum(nil))
 }
 
-func lowerFirst(s string) string {
+func LowerFirst(s string) string {
 	if s == "" {
 		return ""
 	}
@@ -137,10 +88,6 @@ func getSKU() string {
 	return strconv.Itoa(int(time.Now().Unix()*1000 + skuCounter))
 }
 
-func discount(price, percent float64) float64 {
-	return math.Floor(price - (price * percent / 100))
-}
-
 func ToIJSON(v interface{}) string {
 	b, _ := json.MarshalIndent(v, "", " ")
 	return string(b)
@@ -149,18 +96,6 @@ func ToIJSON(v interface{}) string {
 func ToJSON(v interface{}) string {
 	b, _ := json.Marshal(v)
 	return string(b)
-}
-
-func getParams(regEx *regexp.Regexp, data string) (paramsMap map[string]string) {
-	match := regEx.FindStringSubmatch(data)
-
-	paramsMap = make(map[string]string)
-	for i, name := range regEx.SubexpNames() {
-		if i > 0 && i <= len(match) {
-			paramsMap[name] = match[i]
-		}
-	}
-	return
 }
 
 func idx(s []string, e string) int {
@@ -172,7 +107,7 @@ func idx(s []string, e string) int {
 	return -1
 }
 
-func containsAny(s []string, es ...string) bool {
+func ContainsAny(s []string, es ...string) bool {
 	for _, e := range es {
 		if idx(s, e) >= 0 {
 			return true
@@ -181,7 +116,7 @@ func containsAny(s []string, es ...string) bool {
 	return false
 }
 
-func containsAll(s []string, es ...string) bool {
+func ContainsAll(s []string, es ...string) bool {
 	for _, e := range es {
 		if idx(s, e) < 0 {
 			return false
@@ -190,7 +125,7 @@ func containsAll(s []string, es ...string) bool {
 	return true
 }
 
-func jsonEscape(i string) (string, error) {
+func JsonEscape(i string) (string, error) {
 	b, err := json.Marshal(i)
 	if err != nil {
 		return "", err
@@ -199,28 +134,7 @@ func jsonEscape(i string) (string, error) {
 	return s[1 : len(s)-1], nil
 }
 
-func getTags(el *gjson.Result) (tags []string) {
-	log.Info().Str("tags", el.Get("Tags").String()).Msg("getting tags")
-	count := el.Get("Tags.@attributes.count").Int()
-	switch {
-	case count == 1:
-		tags = append(tags, el.Get("Tags.tag").String())
-	case count > 1:
-		el.Get("Tags.tag").ForEach(func(key, value gjson.Result) bool {
-			tags = append(tags, value.String())
-			return true
-		})
-	}
-	return
-}
-
-func boolPtr(v bool) *bool                      { return &v }
-func intPtr(v int) *int                         { return &v }
-func strPtr(v string) *string                   { return &v }
-func timePtr(v time.Time) *time.Time            { return &v }
-func decPtr(v decimal.Decimal) *decimal.Decimal { return &v }
-
-func longestCommonPrefix(strs ...string) string {
+func LongestCommonPrefix(strs ...string) string {
 	if 0 == len(strs) {
 		return ""
 	}

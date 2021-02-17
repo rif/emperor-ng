@@ -5,30 +5,37 @@ import ListItemText from '@material-ui/core/ListItemText';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import PeopleIcon from '@material-ui/icons/People';
 import GavelIcon from '@material-ui/icons/Gavel';
+import DnsIcon from '@material-ui/icons/Dns';
 import AssignmentIcon from '@material-ui/icons/Assignment';
 import { Link } from "react-router-dom";
 
 export const mainListItems = (
     <div>
-        <ListItem button component={Link} to="/admin">
+        <ListItem button component={Link} to="/admin/home">
             <ListItemIcon>
                 <DashboardIcon />
             </ListItemIcon>
             <ListItemText primary="Home"  />
         </ListItem>
-        <ListItem button component={Link} to="/users">
+        <ListItem button component={Link} to="/admin/users">
             <ListItemIcon>
                 <PeopleIcon />
             </ListItemIcon>
             <ListItemText primary="Users" />
         </ListItem>
-        <ListItem button component={Link} to="/commands">
+        <ListItem button component={Link} to="/admin/commands">
             <ListItemIcon>
                 <GavelIcon />
             </ListItemIcon>
             <ListItemText primary="Commands" />
         </ListItem>
-        <ListItem button component={Link} to="/about">
+        <ListItem button component={Link} to="/admin/hosts">
+            <ListItemIcon>
+                <DnsIcon />
+            </ListItemIcon>
+            <ListItemText primary="Hosts" />
+        </ListItem>
+        <ListItem button component={Link} to="/admin/about">
             <ListItemIcon>
                 <AssignmentIcon />
             </ListItemIcon>

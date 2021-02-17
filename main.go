@@ -3,6 +3,7 @@ package main
 import (
 	"emperor-ng/auth"
 	"emperor-ng/commands"
+	"emperor-ng/hosts"
 	"errors"
 	"flag"
 	"fmt"
@@ -74,6 +75,8 @@ func main() {
 	ug := auth.NewUserGroups(db)
 	cmds := commands.NewCommands(db)
 	cg := commands.NewCommandGroups(db)
+	hsts := hosts.NewHosts(db)
+	hg := hosts.NewHostGroups(db)
 
 	t := &templ{
 		templates: make(map[string]*template.Template),
@@ -109,11 +112,10 @@ func main() {
 	l := e.Group("")
 	l.Use(authManager.AuthMiddleware)
 
-	l.GET("/admin", func(c echo.Context) error {
+	l.GET("/admin/*", func(c echo.Context) error {
 		return c.Render(http.StatusOK, "admin", map[string]interface{}{
 			"User":    c.Get("email"),
 			"Group":   c.Get("group"),
-			"Code":    c.Get("code"),
 			"CSRF":    c.Get(middleware.DefaultCSRFConfig.ContextKey),
 			"Version": version,
 		})
@@ -140,10 +142,21 @@ func main() {
 	a.GET("/commands", cmds.GetHandler)
 	a.POST("/command", cmds.PostHandler)
 	a.DELETE("/command", cmds.DeleteHandler)
+	a.GET("/availablecommands", cmds.AvailableHandler)
 
 	// commandsgroups
 	a.GET("/commandgroups/:command", cg.GetHandler)
 	a.POST("/commandgroup/:command", cg.PostHandler)
+
+	// hosts
+	a.GET("/hosts", hsts.GetHandler)
+	a.POST("/host", hsts.PostHandler)
+	a.DELETE("/host", hsts.DeleteHandler)
+	a.GET("/availablehosts", hsts.AvailableHandler)
+
+	// hostsgroups
+	a.GET("/hostgroups/:host", hg.GetHandler)
+	a.POST("/hostgroup/:host", hg.PostHandler)
 
 	// keys
 	a.GET("/keys", keys.GetHandler)

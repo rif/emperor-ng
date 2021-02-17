@@ -5,7 +5,7 @@ import Paper from "@material-ui/core/Paper";
 import Users from "./Users";
 import Groups from "./Groups";
 
-export default function Auth() {
+export default function UsersConsole() {
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
             <Grid container spacing={3}>

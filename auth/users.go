@@ -30,7 +30,7 @@ func NewUsers(db *storm.DB) *Users {
 }
 
 func (us *Users) GetHandler(c echo.Context) error {
-	var users []User
+	users := make([]User, 0)
 	if err := us.db.All(&users); err != nil {
 		return err
 	}

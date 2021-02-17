@@ -32,7 +32,6 @@ type Session struct {
 	Key   string `storm:"id"` // nothing to do with Key below
 	Email string
 	Group string
-	Code  string
 }
 
 func NewManager(db *storm.DB) (*Manager, error) {
@@ -130,7 +129,6 @@ func (am *Manager) AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		c.Set("email", s.Email)
 		c.Set("group", s.Group)
-		c.Set("code", s.Code)
 		return next(c)
 	}
 }

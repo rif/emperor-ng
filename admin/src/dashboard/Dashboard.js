@@ -18,8 +18,9 @@ import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import { mainListItems } from "./listItems";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import Auth from "../users/Auth";
-import Console from "../commands/Console";
+import UsersConsole from "../users/Console";
+import CommandsConsole from "../commands/Console";
+import HostsConsole from "../hosts/Console";
 
 function Copyright() {
     return (
@@ -182,16 +183,19 @@ export default function Dashboard() {
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
                                 <Switch>
-                                    <Route path="/about">
+                                    <Route path="/admin/about">
                                         <About />
                                     </Route>
-                                    <Route path="/users">
-                                        <Auth />
+                                    <Route path="/admin/users">
+                                        <UsersConsole />
                                     </Route>
-                                    <Route path="/commands">
-                                        <Console />
+                                    <Route path="/admin/commands">
+                                        <CommandsConsole />
                                     </Route>
-                                    <Route path="/admin">
+                                    <Route path="/admin/hosts">
+                                        <HostsConsole />
+                                    </Route>
+                                    <Route path="/admin/home">
                                         <Home />
                                     </Route>
                                 </Switch>

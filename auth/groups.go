@@ -24,7 +24,7 @@ func NewGroups(db *storm.DB) *Groups {
 }
 
 func (gs *Groups) GetHandler(c echo.Context) error {
-	var groups []*Group
+	groups := make([]Group, 0)
 	if err := gs.db.All(&groups); err != nil {
 		return err
 	}
