@@ -8,6 +8,14 @@ import EditIcon from "@material-ui/icons/Edit";
 import GroupAddIcon from '@material-ui/icons/GroupAdd';
 import UserGroupsDialog from "./UserGroupsDialog";
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import Title from '../dashboard/Title';
+
+
 
 export default function Users() {
     const [users, setUsers] = React.useState([]);
@@ -21,110 +29,6 @@ export default function Users() {
         lastName: "",
         phone: "",
     });
-    const columns = [
-        { field: "id", headerName: "ID", width: 90 },
-        { field: "email", headerName: "Email", width: 190 },
-        { field: "firstName", headerName: "FirstName", width: 180 },
-        { field: "lastName", headerName: "LastName", width: 180 },
-        { field: "defaultGroup", headerName: "DefaultGroup", width: 180 },
-        { field: "phone", headerName: "Phone", width: 120 },
-        {
-            field: "",
-            headerName: "Actions",
-            sortable: false,
-            width: 110,
-            disableClickEventBubbling: true,
-            renderCell: (params) => {
-                const onClick = (callback) => {
-                    const api = params.api;
-                    const fields = api
-                          .getAllColumns()
-                          .map((c) => c.field)
-                          .filter((c) => c !== "__check__" && !!c);
-                    const thisRow = {};
-
-                    fields.forEach((f) => {
-                        thisRow[f] = params.getValue(f);
-                    });
-
-                    return callback(thisRow);
-                };
-                const edit = (row) => {
-                    setEditedUser(row);
-                    setShowDialog(true);
-                };
-                const remove = (row) => {
-                    handleRemoveUser(row);
-                };
-                const groups = (row) => {
-                    fetch(`/adm/usergroups/${row.id}`)
-                        .then((response) => response.json())
-                        .then((json) => {
-                            setEditedUser(row);
-                            setUserGroups(json.items);
-                            setGroups(json.groups);
-                        });
-                };
-
-                const toggleAdmin = (row) => {
-                    fetch(`/adm/toggleadmin/${row.id}?csrf=${window.csrf}`, { method: "PUT"})
-                        .then((response) => response.text())
-                        .then((group) => {
-                            const newUsers = [...users];
-                            for(let i=0; i < newUsers.length; i++) {
-                                if (newUsers[i].id === row.id){
-                                    newUsers[i].defaultGroup = group;
-                                    break;
-                                }
-                            }
-                            setUsers(newUsers);
-                        });
-                };
-
-                return [
-                    <IconButton
-                        aria-label="delete"
-                        size="small"
-                        onClick={() => {
-                            onClick(edit);
-                        }}
-                    >
-                        <EditIcon />
-                    </IconButton>,
-                    <IconButton
-                        aria-label="edit"
-                        size="small"
-                        onClick={() => {
-                            onClick(toggleAdmin);
-                        }}
-                        color="danger"
-                    >
-                        <SupervisorAccountIcon />
-                    </IconButton>,
-                    <IconButton
-                        aria-label="edit"
-                        size="small"
-                        onClick={() => {
-                            onClick(groups);
-                        }}
-                        color="danger"
-                    >
-                        <GroupAddIcon />
-                    </IconButton>,
-                    <IconButton
-                        aria-label="edit"
-                        size="small"
-                        onClick={() => {
-                            onClick(remove);
-                        }}
-                        color="danger"
-                    >
-                        <DeleteIcon />
-                    </IconButton>,
-                ];
-            },
-        },
-    ];
 
     const handleEditUser = (user) => {
         fetch(`/adm/user?csrf=${window.csrf}`, {
@@ -195,6 +99,56 @@ export default function Users() {
         }
     };
 
+    const editIcon = row => (
+        <IconButton onClick={() => {
+                        setEditedUser(row);
+                        setShowDialog(true);
+                    }}>
+            <EditIcon color="primary" />
+        </IconButton>
+    );
+
+    var toggleAdminIcon = row => (
+        <IconButton onClick={() => {
+                        fetch(`/adm/toggleadmin/${row.id}?csrf=${window.csrf}`, { method: "PUT"})
+                            .then((response) => response.text())
+                            .then((group) => {
+                                const newUsers = [...users];
+                                for(let i=0; i < newUsers.length; i++) {
+                                    if (newUsers[i].id === row.id){
+                                        newUsers[i].defaultGroup = group;
+                                        break;
+                                    }
+                                }
+                                setUsers(newUsers);
+                            });
+                    }}>
+            <SupervisorAccountIcon color="primary" />
+        </IconButton>
+    );
+
+    var groupsIcon = row => (
+        <IconButton onClick={() => {
+                        fetch(`/adm/usergroups/${row.id}`)
+                            .then((response) => response.json())
+                            .then((json) => {
+                                setEditedUser(row);
+                                setUserGroups(json.items);
+                                setGroups(json.groups);
+                            });
+                    }}>
+            <GroupAddIcon color="primary" />
+        </IconButton>
+    );
+
+    var deleteIcon = row => (
+        <IconButton onClick={() => {
+                        handleRemoveUser(row);
+                    }}>
+            <DeleteIcon color="secondary" />
+        </IconButton>
+    );
+
     React.useEffect(() => {
         fetch("/adm/users")
             .then((response) => response.json())
@@ -202,27 +156,41 @@ export default function Users() {
                 setUsers(json.items);
             });
     }, []);
-    
+
     return (
-        <Grid container spacing={2}>
-            <Grid item justify="flex-end" xs={12}>
-                <FormDialog
-                    user={editedUser}
-                    status={showDialog}
-        editUserCallback={handleEditUser}
-            />
+        <React.Fragment>
+            <FormDialog user={editedUser} status={showDialog} editUserCallback={handleEditUser}/>
             <UserGroupsDialog user={editedUser} groups={userGroups} allGroups={groups} />
-            </Grid>
-            <Grid item xs={12}>
-            <div style={{ height: 300, width: "100%" }}>
-            <DataGrid
-                        rows={users}
-                        columns={columns}
-                        pageSize={5}
-                        density="compact"
-                    />
-                </div>
-            </Grid>
-        </Grid>
+            <Title>Users</Title>
+            <Table size="small">
+                <TableHead>
+                    <TableRow>
+                        <TableCell>Email</TableCell>
+                        <TableCell>First Name</TableCell>
+                        <TableCell>Last Name</TableCell>
+                        <TableCell>Phone</TableCell>
+                        <TableCell>Default Group</TableCell>
+                        <TableCell>Actions</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {users.map((user) => (
+                        <TableRow key={user.id}>
+                            <TableCell>{user.email}</TableCell>
+                            <TableCell>{user.firstName}</TableCell>
+                            <TableCell>{user.lastName}</TableCell>
+                            <TableCell>{user.phone}</TableCell>
+                            <TableCell>{user.defaultGroup}</TableCell>
+                            <TableCell align="right">
+                                {editIcon(user)}
+                                {toggleAdminIcon(user)}
+                                {groupsIcon(user)}
+                                {deleteIcon(user)}
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </React.Fragment>
     );
 }

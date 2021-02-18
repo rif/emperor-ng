@@ -1,7 +1,6 @@
 import * as React from "react";
 import Grid from "@material-ui/core/Grid";
 import Container from "@material-ui/core/Container";
-import Paper from "@material-ui/core/Paper";
 import Users from "./Users";
 import Groups from "./Groups";
 
@@ -11,17 +10,11 @@ export default function UsersConsole() {
             <Grid container spacing={3}>
                 {/* Users */}
                 <Grid item xs={12}>
-                    <Paper
-                        sx={{ p: 2, display: "flex", flexDirection: "column", height: 240 }}
-                    >
-                        <Users />
-                    </Paper>
+                    <Users />
                 </Grid>
                 {/* Groups */}
                 <Grid item xs={12}>
-                    <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
-                        <Groups />
-                    </Paper>
+                    <Groups />
                 </Grid>
             </Grid>
         </Container>

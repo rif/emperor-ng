@@ -8,6 +8,7 @@ import (
 	"github.com/asdine/storm/v3/q"
 	"github.com/labstack/echo/v4"
 	"github.com/nats-io/nuid"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -71,6 +72,7 @@ func (us *Users) PostHandler(c echo.Context) error {
 	if err := us.db.Save(u); err != nil {
 		return err
 	}
+	log.Info().Str("user", u.Email).Interface("admin", c.Get("email")).Msg("created new user")
 	return c.String(http.StatusOK, u.ID)
 }
 
@@ -86,7 +88,7 @@ func (us *Users) DeleteHandler(c echo.Context) error {
 	if err := us.db.Select(q.Eq("ID", u.ID)).Delete(new(Key)); err != nil && err != storm.ErrNotFound {
 		return err
 	}
-
+	log.Info().Str("user", u.Email).Interface("admin", c.Get("email")).Msg("deleted user")
 	return c.NoContent(http.StatusOK)
 }
 
@@ -105,5 +107,6 @@ func (us *Users) ToggleAdminHandler(c echo.Context) error {
 	if err := us.db.UpdateField(u, "DefaultGroup", newGroup); err != nil {
 		return err
 	}
+	log.Info().Str("user", u.Email).Str("group", u.DefaultGroup).Interface("admin", c.Get("email")).Msg("toggled admin user")
 	return c.String(http.StatusOK, newGroup)
 }

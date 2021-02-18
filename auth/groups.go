@@ -7,6 +7,7 @@ import (
 	"github.com/asdine/storm/v3/q"
 	"github.com/labstack/echo/v4"
 	"github.com/nats-io/nuid"
+	"github.com/rs/zerolog/log"
 )
 
 type Group struct {
@@ -47,6 +48,7 @@ func (gs *Groups) PostHandler(c echo.Context) error {
 	if err := gs.db.Save(g); err != nil {
 		return err
 	}
+	log.Info().Str("group", g.Name).Interface("admin", c.Get("email")).Msg("created new group")
 	return c.String(http.StatusOK, g.ID)
 }
 
@@ -62,6 +64,6 @@ func (gs *Groups) DeleteHandler(c echo.Context) error {
 	if err := gs.db.Select(q.Eq("GroupID", g.ID)).Delete(new(UserGroup)); err != nil && err != storm.ErrNotFound {
 		return err
 	}
-
+	log.Info().Str("group", g.Name).Interface("admin", c.Get("email")).Msg("deleted group")
 	return c.NoContent(http.StatusOK)
 }

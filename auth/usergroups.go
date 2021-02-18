@@ -102,7 +102,7 @@ func (ugs *UserGroups) PostHandler(c echo.Context) error {
 		}
 	}
 	//TODO:  add longing on all POST handlers
-	log.Info().Str("userID", userID).Interface("email", c.Get("email")).Strs("new", data.NewGroups).Msg("changed user groups")
+	log.Info().Str("userID", userID).Interface("admin", c.Get("email")).Strs("new", data.NewGroups).Msg("changed user groups")
 
 	return c.NoContent(http.StatusOK)
 }

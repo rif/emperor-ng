@@ -7,6 +7,7 @@ import (
 	"github.com/asdine/storm/v3"
 	"github.com/labstack/echo/v4"
 	"github.com/nats-io/nuid"
+	"github.com/rs/zerolog/log"
 )
 
 type HostGroup struct {
@@ -101,5 +102,6 @@ func (cgs *HostGroups) PostHandler(c echo.Context) error {
 			}
 		}
 	}
+	log.Info().Str("hostID", hostID).Interface("email", c.Get("email")).Strs("new", data.NewGroups).Msg("changed host groups")
 	return c.NoContent(http.StatusOK)
 }

@@ -110,6 +110,7 @@ func (cs *Commands) PostHandler(c echo.Context) error {
 	if err := cs.db.Save(cmd); err != nil {
 		return err
 	}
+	log.Info().Str("cmd", cmd.Cmd).Interface("admin", c.Get("email")).Msg("created new command")
 	return c.String(http.StatusOK, cmd.ID)
 }
 
@@ -125,6 +126,6 @@ func (cs *Commands) DeleteHandler(c echo.Context) error {
 	if err := cs.db.Select(q.Eq("CommandID", cmd.ID)).Delete(new(CommandGroup)); err != nil && err != storm.ErrNotFound {
 		return err
 	}
-
+	log.Info().Str("cmd", cmd.Cmd).Interface("admin", c.Get("email")).Msg("deleted command")
 	return c.NoContent(http.StatusOK)
 }

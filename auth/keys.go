@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/nats-io/nuid"
 	"github.com/rif/cache2go"
+	"github.com/rs/zerolog/log"
 )
 
 type Key struct {
@@ -67,6 +68,7 @@ func (ks *Keys) PostHandler(c echo.Context) error {
 	if err := ks.db.Save(key); err != nil {
 		return err
 	}
+	log.Info().Str("key", k.Email).Interface("admin", c.Get("email")).Msg("created new key")
 	return c.String(http.StatusOK, key.Value)
 }
 
@@ -81,5 +83,6 @@ func (ks *Keys) DeleteHandler(c echo.Context) error {
 	if err := ks.db.DeleteStruct(k); err != nil {
 		return err
 	}
+	log.Info().Str("key", k.Email).Interface("admin", c.Get("email")).Msg("deleted key")
 	return c.NoContent(http.StatusOK)
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/asdine/storm/v3/q"
 	"github.com/labstack/echo/v4"
 	"github.com/nats-io/nuid"
+	"github.com/rs/zerolog/log"
 )
 
 type Host struct {
@@ -91,31 +92,32 @@ func (cs *Hosts) AvailableHandler(c echo.Context) error {
 }
 
 func (cs *Hosts) PostHandler(c echo.Context) error {
-	cmd := new(Host)
-	if err := c.Bind(cmd); err != nil {
+	host := new(Host)
+	if err := c.Bind(host); err != nil {
 		return err
 	}
-	if cmd.ID == "" {
-		cmd.ID = nuid.Next()
+	if host.ID == "" {
+		host.ID = nuid.Next()
 	}
-	if err := cs.db.Save(cmd); err != nil {
+	if err := cs.db.Save(host); err != nil {
 		return err
 	}
-	return c.String(http.StatusOK, cmd.ID)
+	log.Info().Str("address", host.Address).Str("name", host.Name).Interface("admin", c.Get("email")).Msg("created new host")
+	return c.String(http.StatusOK, host.ID)
 }
 
 func (cs *Hosts) DeleteHandler(c echo.Context) error {
-	cmd := new(Host)
-	if err := c.Bind(cmd); err != nil {
+	host := new(Host)
+	if err := c.Bind(host); err != nil {
 		return err
 	}
-	if err := cs.db.DeleteStruct(cmd); err != nil {
+	if err := cs.db.DeleteStruct(host); err != nil {
 		return err
 	}
 	// remove user hosts
-	if err := cs.db.Select(q.Eq("HostID", cmd.ID)).Delete(new(HostGroup)); err != nil && err != storm.ErrNotFound {
+	if err := cs.db.Select(q.Eq("HostID", host.ID)).Delete(new(HostGroup)); err != nil && err != storm.ErrNotFound {
 		return err
 	}
-
+	log.Info().Str("address", host.Address).Str("name", host.Name).Interface("admin", c.Get("email")).Msg("deleted host")
 	return c.NoContent(http.StatusOK)
 }
