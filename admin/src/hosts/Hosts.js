@@ -1,99 +1,30 @@
 import * as React from "react";
-import { DataGrid } from "@material-ui/data-grid";
-import FormDialog from "./CreateHostDialog";
-import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
+import Button from "@material-ui/core/Button";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import GroupAddIcon from '@material-ui/icons/GroupAdd';
+import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import Title from '../dashboard/Title';
 import HostGroupsDialog from "./HostGroupsDialog";
+import EditHostDialog from "./EditHostDialog";
 
 export default function Hosts() {
     const [hosts, setHosts] = React.useState([]);
     const [showDialog, setShowDialog] = React.useState(false);
+    const [showHostGroupsDialog, setShowHostGroupsDialog] = React.useState(false);
     const [hostGroups, setHostGroups] = React.useState([]);
     const [groups, setGroups] = React.useState([]);
     const [editedHost, setEditedHost] = React.useState({
         id: "",
         name: "",
-        address: "",
+        address: ""
     });
-    const columns = [
-        { field: "id", headerName: "ID", width: 90 },
-        { field: "name", headerName: "Name", width: 190 },
-        { field: "address", headerName: "Address", width: 180 },
-        {
-            field: "",
-            headerName: "Actions",
-            sortable: false,
-            width: 110,
-            disableClickEventBubbling: true,
-            renderCell: (params) => {
-                const onClick = (callback) => {
-                    const api = params.api;
-                    const fields = api
-                          .getAllColumns()
-                          .map((c) => c.field)
-                          .filter((c) => c !== "__check__" && !!c);
-                    const thisRow = {};
-
-                    fields.forEach((f) => {
-                        thisRow[f] = params.getValue(f);
-                    });
-
-                    return callback(thisRow);
-                };
-                const edit = (row) => {
-                    setEditedHost(row);
-                    setShowDialog(true);
-                };
-                const remove = (row) => {
-                    handleRemoveHost(row);
-                };
-                const groups = (row) => {
-                    fetch(`/adm/hostgroups/${row.id}`)
-                        .then((response) => response.json())
-                        .then((json) => {
-                            setEditedHost(row);
-                            setHostGroups(json.items);
-                            setGroups(json.groups);
-                        });
-                };
-
-                return [
-                    <IconButton
-                        aria-label="delete"
-                        size="small"
-                        onClick={() => {
-                            onClick(edit);
-                        }}
-                    >
-                        <EditIcon />
-                    </IconButton>,
-                    <IconButton
-                        aria-label="edit"
-                        size="small"
-                        onClick={() => {
-                            onClick(groups);
-                        }}
-                        color="danger"
-                    >
-                        <GroupAddIcon />
-                    </IconButton>,
-                    <IconButton
-                        aria-label="edit"
-                        size="small"
-                        onClick={() => {
-                            onClick(remove);
-                        }}
-                        color="danger"
-                    >
-                        <DeleteIcon />
-                    </IconButton>,
-                ];
-            },
-        },
-    ];
 
     const handleEditHost = (host) => {
         fetch(`/adm/host?csrf=${window.csrf}`, {
@@ -105,12 +36,10 @@ export default function Hosts() {
                 id: host.id,
                 name: host.name,
                 address: host.address,
-                danger: host.danger,
             }),
         })
             .then((resp) => resp.text())
             .then((text) => {
-                host.pass = "";
                 host.id = text;
                 const newHosts = [...hosts];
                 let found = false;
@@ -125,6 +54,7 @@ export default function Hosts() {
                     newHosts.push(host);
                 }
                 setHosts(newHosts);
+                handleDialogClose();
             });
     };
 
@@ -162,6 +92,50 @@ export default function Hosts() {
         }
     };
 
+    const handleHostGroupsDialogClose = () => {
+        setShowHostGroupsDialog(false);
+    }
+
+    const handleDialogClose = () => {
+        setShowDialog(false);
+    }
+
+    const handleClickOpen = () => {
+        setShowDialog(true);
+    };
+
+    const editIcon = row => (
+        <IconButton onClick={() => {
+                        setEditedHost(row);
+                        setShowDialog(true);
+                    }}>
+            <EditIcon color="primary" />
+        </IconButton>
+    );
+
+    var groupsIcon = row => (
+        <IconButton onClick={() => {
+                        fetch(`/adm/hostgroups/${row.id}`)
+                            .then((response) => response.json())
+                            .then((json) => {
+                                setEditedHost(row);
+                                setHostGroups(json.items);
+                                setGroups(json.groups);
+                                setShowHostGroupsDialog(true);
+                            });
+                    }}>
+            <GroupAddIcon color="primary" />
+        </IconButton>
+    );
+
+    var deleteIcon = row => (
+        <IconButton onClick={() => {
+                        handleRemoveHost(row);
+                    }}>
+            <DeleteIcon color="secondary" />
+        </IconButton>
+    );
+
     React.useEffect(() => {
         fetch("/adm/hosts")
             .then((response) => response.json())
@@ -169,26 +143,38 @@ export default function Hosts() {
                 setHosts(json.items);
             });
     }, []);
+
     return (
-            <Grid container spacing={2}>
-            <Grid item justify="flex-end" xs={12}>
-                <FormDialog
-        host={editedHost}
-        status={showDialog}
-        editHostCallback={handleEditHost}
-            />
-            <HostGroupsDialog host={editedHost} groups={hostGroups} allGroups={groups} />
-            </Grid>
-            <Grid item xs={12}>
-            <div style={{ height: 300, width: "100%" }}>
-            <DataGrid
-        rows={hosts}
-        columns={columns}
-        pageSize={5}
-        density="compact"
-                    />
-                </div>
-            </Grid>
-        </Grid>
+        <React.Fragment>
+            <Button style={{float:'right'}} variant="outlined" color="primary" onClick={ () => {
+                        setEditedHost({id: "", name: "", address: ""})
+                        handleClickOpen();
+                    }}>New Host</Button>
+            <EditHostDialog open={showDialog} host={editedHost} editHostCallback={handleEditHost} onClose={handleDialogClose}/>
+            <HostGroupsDialog open={showHostGroupsDialog} onClose={handleHostGroupsDialogClose} host={editedHost} groups={hostGroups} allGroups={groups} />
+            <Title>Hosts</Title>
+            <Table size="small">
+                <TableHead>
+                    <TableRow>
+                        <TableCell>Name</TableCell>
+                        <TableCell>Address</TableCell>
+                        <TableCell>Actions</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {hosts.map((host) => (
+                        <TableRow key={host.id}>
+                            <TableCell>{host.name}</TableCell>
+                            <TableCell>{host.address}</TableCell>
+                            <TableCell align="right">
+                                {editIcon(host)}
+                                {groupsIcon(host)}
+                                {deleteIcon(host)}
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </React.Fragment>
     );
 }

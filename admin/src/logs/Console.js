@@ -1,3 +1,5 @@
+import Title from '../dashboard/Title';
+
 export default function LogsConsole() {
-    return <h2>Logs</h2>;
+    return <Title>Logs</Title>;
 }

@@ -1,103 +1,31 @@
 import * as React from "react";
-import { DataGrid } from "@material-ui/data-grid";
-import FormDialog from "./CreateCommandDialog";
-import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
+import Button from "@material-ui/core/Button";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import GroupAddIcon from '@material-ui/icons/GroupAdd';
-import CommandGroupsDialog from "./CommandGroupsDialog"
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import Title from '../dashboard/Title';
+import CommandGroupsDialog from "./CommandGroupsDialog";
+import EditCommandDialog from "./EditCommandDialog";
 
 export default function Commands() {
     const [commands, setCommands] = React.useState([]);
     const [showDialog, setShowDialog] = React.useState(false);
+    const [showCommandGroupsDialog, setShowCommandGroupsDialog] = React.useState(false);
     const [commandGroups, setCommandGroups] = React.useState([]);
     const [groups, setGroups] = React.useState([]);
     const [editedCommand, setEditedCommand] = React.useState({
         id: "",
         description: "",
         cmd: "",
-        lastName: "",
-        phone: "",
+        danger: false,
     });
-    const columns = [
-        { field: "id", headerName: "ID", width: 90 },
-        { field: "description", headerName: "Description", width: 190 },
-        { field: "cmd", headerName: "Cmd", width: 180 },
-        { field: "danger", headerName: "Danger", width: 180 },
-        {
-            field: "",
-            headerName: "Actions",
-            sortable: false,
-            width: 110,
-            disableClickEventBubbling: true,
-            renderCell: (params) => {
-                const onClick = (callback) => {
-                    const api = params.api;
-                    const fields = api
-                          .getAllColumns()
-                          .map((c) => c.field)
-                          .filter((c) => c !== "__check__" && !!c);
-                    const thisRow = {};
-
-                    fields.forEach((f) => {
-                        thisRow[f] = params.getValue(f);
-                    });
-
-                    return callback(thisRow);
-                };
-                const edit = (row) => {
-                    setEditedCommand(row);
-                    setShowDialog(true);
-                };
-                const remove = (row) => {
-                    handleRemoveCommand(row);
-                };
-                const groups = (row) => {
-                    fetch(`/adm/commandgroups/${row.id}`)
-                        .then((response) => response.json())
-                        .then((json) => {
-                            setEditedCommand(row);
-                            setCommandGroups(json.items);
-                            setGroups(json.groups);
-                        });
-                };
-
-                return [
-                    <IconButton
-                        aria-label="delete"
-                        size="small"
-                        onClick={() => {
-                            onClick(edit);
-                        }}
-                    >
-                        <EditIcon />
-                    </IconButton>,
-                    <IconButton
-                        aria-label="edit"
-                        size="small"
-                        onClick={() => {
-                            onClick(groups);
-                        }}
-                        color="danger"
-                    >
-                        <GroupAddIcon />
-                    </IconButton>,
-                    <IconButton
-                        aria-label="edit"
-                        size="small"
-                        onClick={() => {
-                            onClick(remove);
-                        }}
-                        color="danger"
-                    >
-                        <DeleteIcon />
-                    </IconButton>,
-                ];
-            },
-        },
-    ];
 
     const handleEditCommand = (command) => {
         fetch(`/adm/command?csrf=${window.csrf}`, {
@@ -114,7 +42,6 @@ export default function Commands() {
         })
             .then((resp) => resp.text())
             .then((text) => {
-                command.pass = "";
                 command.id = text;
                 const newCommands = [...commands];
                 let found = false;
@@ -129,6 +56,7 @@ export default function Commands() {
                     newCommands.push(command);
                 }
                 setCommands(newCommands);
+                handleDialogClose();
             });
     };
 
@@ -166,6 +94,50 @@ export default function Commands() {
         }
     };
 
+    const handleCommandGroupsDialogClose = () => {
+        setShowCommandGroupsDialog(false);
+    }
+
+    const handleDialogClose = () => {
+        setShowDialog(false);
+    }
+
+    const handleClickOpen = () => {
+        setShowDialog(true);
+    };
+
+    const editIcon = row => (
+        <IconButton onClick={() => {
+                        setEditedCommand(row);
+                        setShowDialog(true);
+                    }}>
+            <EditIcon color="primary" />
+        </IconButton>
+    );
+
+    var groupsIcon = row => (
+        <IconButton onClick={() => {
+                        fetch(`/adm/commandgroups/${row.id}`)
+                            .then((response) => response.json())
+                            .then((json) => {
+                                setEditedCommand(row);
+                                setCommandGroups(json.items);
+                                setGroups(json.groups);
+                                setShowCommandGroupsDialog(true);
+                            });
+                    }}>
+            <GroupAddIcon color="primary" />
+        </IconButton>
+    );
+
+    var deleteIcon = row => (
+        <IconButton onClick={() => {
+                        handleRemoveCommand(row);
+                    }}>
+            <DeleteIcon color="secondary" />
+        </IconButton>
+    );
+
     React.useEffect(() => {
         fetch("/adm/commands")
             .then((response) => response.json())
@@ -173,26 +145,40 @@ export default function Commands() {
                 setCommands(json.items);
             });
     }, []);
+
     return (
-        <Grid container spacing={2}>
-            <Grid item justify="flex-end" xs={12}>
-                <FormDialog
-                    command={editedCommand}
-                    status={showDialog}
-                    editCommandCallback={handleEditCommand}
-                />
-                <CommandGroupsDialog command={editedCommand} groups={commandGroups} allGroups={groups} />
-            </Grid>
-            <Grid item xs={12}>
-                <div style={{ height: 300, width: "100%" }}>
-                    <DataGrid
-                        rows={commands}
-                        columns={columns}
-                        pageSize={5}
-                        density="compact"
-                    />
-                </div>
-            </Grid>
-        </Grid>
+        <React.Fragment>
+            <Button style={{float:'right'}} variant="outlined" color="primary" onClick={ () => {
+                        setEditedCommand({id: "", description: "", cmd: "", danger: false})
+                        handleClickOpen();
+                    }}>New Command</Button>
+            <EditCommandDialog open={showDialog} command={editedCommand} editCommandCallback={handleEditCommand} onClose={handleDialogClose}/>
+            <CommandGroupsDialog open={showCommandGroupsDialog} onClose={handleCommandGroupsDialogClose} command={editedCommand} groups={commandGroups} allGroups={groups} />
+            <Title>Commands</Title>
+            <Table size="small">
+                <TableHead>
+                    <TableRow>
+                        <TableCell>Description</TableCell>
+                        <TableCell>Cmd</TableCell>
+                        <TableCell>Danger</TableCell>
+                        <TableCell>Actions</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {commands.map((command) => (
+                        <TableRow key={command.id}>
+                            <TableCell>{command.description}</TableCell>
+                            <TableCell>{command.cmd}</TableCell>
+                            <TableCell>{command.danger}</TableCell>
+                            <TableCell align="right">
+                                {editIcon(command)}
+                                {groupsIcon(command)}
+                                {deleteIcon(command)}
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </React.Fragment>
     );
 }

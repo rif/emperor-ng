@@ -6,17 +6,15 @@ import Groups from "./Groups";
 
 export default function UsersConsole() {
     return (
-        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            <Grid container spacing={3}>
-                {/* Users */}
-                <Grid item xs={12}>
-                    <Users />
-                </Grid>
-                {/* Groups */}
-                <Grid item xs={12}>
-                    <Groups />
-                </Grid>
+        <Grid container spacing={3}>
+            {/* Users */}
+            <Grid item xs={12} md={8} lg={9}>
+                <Users />
             </Grid>
-        </Container>
+            {/* Groups */}
+            <Grid item xs={12} md={4} lg={3}>
+                <Groups />
+            </Grid>
+        </Grid>
     );
 }

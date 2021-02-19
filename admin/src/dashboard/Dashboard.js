@@ -24,13 +24,15 @@ import CommandsConsole from "../commands/Console";
 import HostsConsole from "../hosts/Console";
 import Box from '@material-ui/core/Box';
 import Paper from '@material-ui/core/Paper';
-
+import Title from '../dashboard/Title';
 
 function Copyright() {
     return (
         <Typography variant="body2" color="textSecondary" align="center">
             {'Copyright © '}
-            {' '}
+            <Link color="inherit" href="https://material-ui.com/">
+                Your Website
+            </Link>{' '}
             {new Date().getFullYear()}
             {'.'}
         </Typography>
@@ -39,7 +41,7 @@ function Copyright() {
 
 
 function About() {
-    return <h2>About</h2>;
+    return <Title>About</Title>;
 }
 
 
@@ -167,41 +169,37 @@ export default function Dashboard() {
                     }}
                     open={open}
                 >
-                <div className={classes.toolbarIcon}>
-                    <IconButton onClick={handleDrawerClose}>
-                        <ChevronLeftIcon />
-                    </IconButton>
-                </div>
-                <Divider />
-                <List>{mainListItems}</List>
-            </Drawer>
-            <main className={classes.content}>
+                    <div className={classes.toolbarIcon}>
+                        <IconButton onClick={handleDrawerClose}>
+                            <ChevronLeftIcon />
+                        </IconButton>
+                    </div>
+                    <Divider />
+                    <List>{mainListItems}</List>
+                </Drawer>
+                <main className={classes.content}>
                     <div className={classes.appBarSpacer} />
-                    <Container maxWidth="lg" className={classes.container}>
-                        <Grid container spacing={3}>
-                            {/* Router stuff */}
-                            <Grid item xs={12}>
-                                <Paper className={classes.paper}>
-                                    <Switch>
-                                        <Route path="/admin/about">
-                                            <About />
-                                        </Route>
-                                        <Route path="/admin/users">
-                                            <UsersConsole />
-                                        </Route>
-                                        <Route path="/admin/commands">
-                                            <CommandsConsole />
-                                        </Route>
-                                        <Route path="/admin/hosts">
-                                            <HostsConsole />
-                                        </Route>
-                                        <Route path="/admin">
-                                            <LogsConsole />
-                                        </Route>
-                                    </Switch>
-                                </Paper>
-                            </Grid>
-                        </Grid>
+                    <Container className={classes.container}>
+                        {/* Router stuff */}
+                        <Paper className={classes.paper}>
+                            <Switch>
+                                <Route path="/admin/about">
+                                    <About />
+                                </Route>
+                                <Route path="/admin/users">
+                                    <UsersConsole />
+                                </Route>
+                                <Route path="/admin/commands">
+                                    <CommandsConsole />
+                                </Route>
+                                <Route path="/admin/hosts">
+                                    <HostsConsole />
+                                </Route>
+                                <Route path="/admin">
+                                    <LogsConsole />
+                                </Route>
+                            </Switch>
+                        </Paper>
                         <Box pt={4}>
                             <Copyright />
                         </Box>

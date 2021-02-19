@@ -12,7 +12,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Title from '../dashboard/Title';
 import UserGroupsDialog from "./UserGroupsDialog";
-import EditUserDialog from "./CreateUserDialog";
+import EditUserDialog from "./EditUserDialog";
 
 export default function Users() {
     const [users, setUsers] = React.useState([]);
@@ -171,10 +171,10 @@ export default function Users() {
 
     return (
         <React.Fragment>
-            <Button variant="outlined" color="primary" onClick={ () => {
+            <Button style={{float:'right'}} variant="outlined" color="primary" onClick={ () => {
                         setEditedUser({id: "", email: "", firstName: "", lastName: "", phone: ""})
                         handleClickOpen();
-                    }}>New User</Button>
+                     }}>New User</Button>
             <EditUserDialog open={showDialog} user={editedUser} editUserCallback={handleEditUser} onClose={handleDialogClose}/>
             <UserGroupsDialog open={showUserGroupsDialog} onClose={handleUserGroupsDialogClose} user={editedUser} groups={userGroups} allGroups={groups} />
             <Title>Users</Title>
