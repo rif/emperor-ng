@@ -79,7 +79,7 @@ export default function EditCommandDialog({ command, open, editCommandCallback, 
                             onChange={(e) =>
                                 setEditedCommand({
                                     ...editedCommand,
-                                    ["danger"]: e.target.checked,
+                                    ["danger"]: e.target.value,
                                 })
                             }
                             inputProps={{

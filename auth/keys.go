@@ -65,6 +65,7 @@ func (ks *Keys) PostHandler(c echo.Context) error {
 		Value: nuid.Next(),
 	}
 	ks.cache.Set(key.Value, key.Email)
+
 	if err := ks.db.Save(key); err != nil {
 		return err
 	}

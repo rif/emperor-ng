@@ -4,6 +4,7 @@ import (
 	"emperor-ng/auth"
 	"emperor-ng/utils"
 	"net/http"
+	"time"
 
 	"github.com/asdine/storm/v3"
 	"github.com/asdine/storm/v3/q"
@@ -13,9 +14,13 @@ import (
 )
 
 type Host struct {
-	ID      string `storm:"id" json:"id"`
-	Name    string `storm:"index" json:"name"`
-	Address string `storm:"unique" json:"address"`
+	ID         string    `storm:"id" json:"id"`
+	Name       string    `storm:"index" json:"name"`
+	Address    string    `storm:"unique" json:"address"`
+	CreatedAt  time.Time `storm:"index" json:"createdAt"`
+	CreatedBy  string    `storm:"index" json:"createdBy"`
+	ModifiedAt time.Time `storm:"index" json:"modifiedAt"`
+	ModifiedBy string    `storm:"index" json:"modifiedBy"`
 }
 
 type Hosts struct {
@@ -42,7 +47,7 @@ func (cs *Hosts) AvailableHandler(c echo.Context) error {
 	email := c.Get("email")
 	group := c.Get("group")
 	hosts := make([]Host, 0)
-	if err := cs.db.All(&hosts); err != nil && err != storm.ErrNotFound {
+	if err := cs.db.AllByIndex("CreatedAt", &hosts); err != nil && err != storm.ErrNotFound {
 		return err
 	}
 	if group == auth.GroupAdmins {
@@ -98,6 +103,13 @@ func (cs *Hosts) PostHandler(c echo.Context) error {
 	}
 	if host.ID == "" {
 		host.ID = nuid.Next()
+		host.CreatedBy = c.Get("email").(string)
+		host.CreatedAt = time.Now()
+		host.ModifiedBy = c.Get("email").(string)
+		host.ModifiedAt = time.Now()
+	} else {
+		host.ModifiedBy = c.Get("email").(string)
+		host.ModifiedAt = time.Now()
 	}
 	if err := cs.db.Save(host); err != nil {
 		return err

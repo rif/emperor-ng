@@ -5,6 +5,7 @@ import (
 	"emperor-ng/utils"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/asdine/storm/v3"
 	"github.com/asdine/storm/v3/q"
@@ -14,11 +15,15 @@ import (
 )
 
 type Command struct {
-	ID          string `storm:"id" json:"id"`
-	Cmd         string `json:"cmd"`
-	Params      string `json:"params"`
-	Description string `storm:"index" json:"description"`
-	Danger      int    `json:"danger"`
+	ID          string    `storm:"id" json:"id"`
+	Cmd         string    `json:"cmd"`
+	Params      string    `json:"params"`
+	Description string    `storm:"index" json:"description"`
+	Danger      int       `json:"danger"`
+	CreatedAt   time.Time `storm:"index" json:"createdAt"`
+	CreatedBy   string    `storm:"index" json:"createdBy"`
+	ModifiedAt  time.Time `storm:"index" json:"modifiedAt"`
+	ModifiedBy  string    `storm:"index" json:"modifiedBy"`
 }
 
 func (c *Command) Execute() (string, error) {
@@ -35,8 +40,8 @@ func NewCommands(db *storm.DB) *Commands {
 }
 
 func (cs *Commands) GetHandler(c echo.Context) error {
-	var commands []Command
-	if err := cs.db.All(&commands); err != nil {
+	commands := make([]Command, 0)
+	if err := cs.db.AllByIndex("CreatedAt", &commands); err != nil && err != storm.ErrNotFound {
 		return err
 	}
 
@@ -106,6 +111,13 @@ func (cs *Commands) PostHandler(c echo.Context) error {
 	}
 	if cmd.ID == "" {
 		cmd.ID = nuid.Next()
+		cmd.CreatedBy = c.Get("email").(string)
+		cmd.CreatedAt = time.Now()
+		cmd.ModifiedBy = c.Get("email").(string)
+		cmd.ModifiedAt = time.Now()
+	} else {
+		cmd.ModifiedBy = c.Get("email").(string)
+		cmd.ModifiedAt = time.Now()
 	}
 	if err := cs.db.Save(cmd); err != nil {
 		return err

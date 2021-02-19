@@ -16,6 +16,7 @@ type Execution struct {
 	Params    string    `json:"params"`
 	Output    string    `json:"output"`
 	Timestamp time.Time `storm:"index" json:"timestamp"`
+	Count     int       `json:"count"`
 }
 
 type Filter struct {

@@ -71,6 +71,10 @@ func (am *Manager) initAuth() error {
 			Email:        "admin@mailinator.com",
 			Password:     string(hash),
 			DefaultGroup: GroupAdmins,
+			CreatedBy:    "system",
+			CreatedAt:    time.Now(),
+			ModifiedBy:   "system",
+			ModifiedAt:   time.Now(),
 		}); err != nil {
 			return err
 		}

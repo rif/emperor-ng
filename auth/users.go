@@ -3,6 +3,7 @@ package auth
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/asdine/storm/v3"
 	"github.com/asdine/storm/v3/q"
@@ -13,13 +14,17 @@ import (
 )
 
 type User struct {
-	ID           string `storm:"id,increment" json:"id"` // primary key
-	DefaultGroup string `storm:"index" json:"defaultGroup"`
-	Email        string `storm:"unique" json:"email"`
-	Phone        string `storm:"index" json:"phone"`
-	FirstName    string `storm:"index" json:"firstName"`
-	LastName     string `storm:"index" json:"lastName"`
-	Password     string `json:"password"`
+	ID           string    `storm:"id,increment" json:"id"` // primary key
+	DefaultGroup string    `storm:"index" json:"defaultGroup"`
+	Email        string    `storm:"unique" json:"email"`
+	Phone        string    `storm:"index" json:"phone"`
+	FirstName    string    `storm:"index" json:"firstName"`
+	LastName     string    `storm:"index" json:"lastName"`
+	Password     string    `storm:"index" json:"password"`
+	CreatedAt    time.Time `storm:"index" json:"createdAt"`
+	CreatedBy    string    `storm:"index" json:"createdBy"`
+	ModifiedAt   time.Time `storm:"index" json:"modifiedAt"`
+	ModifiedBy   string    `storm:"index" json:"modifiedBy"`
 }
 
 type Users struct {
@@ -32,7 +37,7 @@ func NewUsers(db *storm.DB) *Users {
 
 func (us *Users) GetHandler(c echo.Context) error {
 	users := make([]User, 0)
-	if err := us.db.All(&users); err != nil {
+	if err := us.db.AllByIndex("CreatedAt", &users); err != nil {
 		return err
 	}
 
@@ -68,6 +73,13 @@ func (us *Users) PostHandler(c echo.Context) error {
 	}
 	if u.ID == "" {
 		u.ID = nuid.Next()
+		u.CreatedBy = c.Get("email").(string)
+		u.CreatedAt = time.Now()
+		u.ModifiedBy = c.Get("email").(string)
+		u.ModifiedAt = time.Now()
+	} else {
+		u.ModifiedBy = c.Get("email").(string)
+		u.ModifiedAt = time.Now()
 	}
 	if err := us.db.Save(u); err != nil {
 		return err
