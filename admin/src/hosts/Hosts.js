@@ -158,7 +158,7 @@ export default function Hosts() {
                     <TableRow>
                         <TableCell>Name</TableCell>
                         <TableCell>Address</TableCell>
-                        <TableCell>Actions</TableCell>
+                        <TableCell align="right">Actions</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>

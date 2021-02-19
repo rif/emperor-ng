@@ -186,7 +186,7 @@ export default function Users() {
                         <TableCell>Last Name</TableCell>
                         <TableCell>Phone</TableCell>
                         <TableCell>Default Group</TableCell>
-                        <TableCell>Actions</TableCell>
+                        <TableCell align="right">Actions</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>

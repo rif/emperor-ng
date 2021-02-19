@@ -18,7 +18,7 @@ type Command struct {
 	Cmd         string `json:"cmd"`
 	Params      string `json:"params"`
 	Description string `storm:"index" json:"description"`
-	Danger      bool   `json:"danger"`
+	Danger      int    `json:"danger"`
 }
 
 func (c *Command) Execute() (string, error) {

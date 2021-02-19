@@ -131,7 +131,7 @@ export default function Groups() {
                 <TableHead>
                     <TableRow>
                         <TableCell>Name</TableCell>
-                        <TableCell>Actions</TableCell>
+                        <TableCell align="right">Actions</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>

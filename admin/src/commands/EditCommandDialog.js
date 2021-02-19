@@ -6,16 +6,30 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import NativeSelect from '@material-ui/core/NativeSelect';
+import InputLabel from '@material-ui/core/InputLabel';
+import { makeStyles } from '@material-ui/core/styles';
 
+const useStyles = makeStyles((theme) => ({
+    formControl: {
+        margin: theme.spacing(1),
+        minWidth: 120,
+    },
+    selectEmpty: {
+        marginTop: theme.spacing(2),
+    },
+}));
 
 export default function EditCommandDialog({ command, open, editCommandCallback, onClose }) {
+    const classes = useStyles();
     const [editedCommand, setEditedCommand] = React.useState(command);
     React.useEffect(() => {
         setEditedCommand(command);
     }, [command]);
-    
+
     return (
         <Dialog
             open={open}
@@ -58,12 +72,30 @@ export default function EditCommandDialog({ command, open, editCommandCallback, 
                         type="text"
                         fullWidth
                     />
-                    <FormControlLabel control={<Checkbox name="checkedC" />} label="Dangerous Command" checked={editedCommand.danger} onChange={(e) =>
-                                          setEditedCommand({
-                                              ...editedCommand,
-                                              ["danger"]: e.target.checked,
-                                          })
-                                      }/>
+                    <FormControl className={classes.formControl}>
+                        <InputLabel htmlFor="age-native-helper">Command Impact</InputLabel>
+                        <NativeSelect
+                            value={editedCommand.danger}
+                            onChange={(e) =>
+                                setEditedCommand({
+                                    ...editedCommand,
+                                    ["danger"]: e.target.checked,
+                                })
+                            }
+                            inputProps={{
+                                name: 'age',
+                                id: 'age-native-helper',
+                            }}
+                        >
+                            <option aria-label="None" value="" />
+                            <option value={1}>Safe</option>
+                            <option value={2}>Low</option>
+                            <option value={3}>Medium</option>
+                            <option value={4}>High</option>
+                            <option value={5}>Extreme</option>
+                        </NativeSelect>
+                        <FormHelperText>Some important helper text</FormHelperText>
+                    </FormControl>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={onClose} color="primary">

@@ -26,6 +26,13 @@ export default function Commands() {
         cmd: "",
         danger: false,
     });
+    const dangerMap = {
+        1: 'Safe',
+        2: 'Low',
+        3: 'Medium',
+        4: 'High',
+        5: 'Extreme',
+    };
 
     const handleEditCommand = (command) => {
         fetch(`/adm/command?csrf=${window.csrf}`, {
@@ -37,7 +44,7 @@ export default function Commands() {
                 id: command.id,
                 description: command.description,
                 cmd: command.cmd,
-                danger: command.danger,
+                danger: parseInt(command.danger),
             }),
         })
             .then((resp) => resp.text())
@@ -149,7 +156,7 @@ export default function Commands() {
     return (
         <React.Fragment>
             <Button style={{float:'right'}} variant="outlined" color="primary" onClick={ () => {
-                        setEditedCommand({id: "", description: "", cmd: "", danger: false})
+                        setEditedCommand({id: "", description: "", cmd: "", danger: 1})
                         handleClickOpen();
                     }}>New Command</Button>
             <EditCommandDialog open={showDialog} command={editedCommand} editCommandCallback={handleEditCommand} onClose={handleDialogClose}/>
@@ -161,7 +168,7 @@ export default function Commands() {
                         <TableCell>Description</TableCell>
                         <TableCell>Cmd</TableCell>
                         <TableCell>Danger</TableCell>
-                        <TableCell>Actions</TableCell>
+                        <TableCell align="right">Actions</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -169,7 +176,7 @@ export default function Commands() {
                         <TableRow key={command.id}>
                             <TableCell>{command.description}</TableCell>
                             <TableCell>{command.cmd}</TableCell>
-                            <TableCell>{command.danger}</TableCell>
+                            <TableCell>{dangerMap[command.danger]}</TableCell>
                             <TableCell align="right">
                                 {editIcon(command)}
                                 {groupsIcon(command)}
