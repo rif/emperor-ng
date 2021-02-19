@@ -23,10 +23,9 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function UserGroupsDialog({ user, groups, allGroups }) {
+export default function UserGroupsDialog({ open, onClose, user, groups, allGroups }) {
     const classes = useStyles();
     const [checked, setChecked] = React.useState([]);
-    const [showDialog, setShowDialog] = React.useState(false);
 
     const handleToggle = (value) => () => {
         const currentIndex = checked.indexOf(value);
@@ -40,9 +39,6 @@ export default function UserGroupsDialog({ user, groups, allGroups }) {
 
         setChecked(newChecked);
     };
-    const handleClose = () => {
-        setShowDialog(false);
-    };
 
     const handleSubmit = () => {
         fetch(`/adm/usergroup/${user.id}?csrf=${window.csrf}`, {
@@ -52,20 +48,19 @@ export default function UserGroupsDialog({ user, groups, allGroups }) {
             },
             body: JSON.stringify({newGroups:checked}),
         }).then((resp) => {
-            setShowDialog(false);
             if (resp.status !== 200) {
                 alert("Could not set user groups!");
             }
+            onClose();
         });
     };
 
     React.useEffect(() => {
         setChecked(groups);
-        setShowDialog(user.id !== '');
-    }, [groups, user, allGroups]);
+    }, [open]);
 
     return (
-        <Dialog aria-labelledby="simple-dialog-title" open={showDialog} onClose={handleClose}>
+        <Dialog aria-labelledby="simple-dialog-title" open={open} onClose={onClose}>
             <DialogTitle id="simple-dialog-title">Additional Groups</DialogTitle>
             <DialogContent>
                 <List className={classes.root}>
@@ -95,7 +90,7 @@ export default function UserGroupsDialog({ user, groups, allGroups }) {
                 </List>
             </DialogContent>
             <DialogActions>
-                <Button onClick={handleClose} color="primary">
+                <Button onClick={onClose} color="primary">
                     Cancel
                 </Button>
                 <Button onClick={handleSubmit} color="primary" autoFocus>
@@ -105,9 +100,3 @@ export default function UserGroupsDialog({ user, groups, allGroups }) {
         </Dialog>
     );
 }
-
-UserGroupsDialog.propTypes = {
-    open: PropTypes.bool.isRequired,
-    groups: PropTypes.array.isRequired,
-    allGroups: PropTypes.array.isRequired,
-};

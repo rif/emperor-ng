@@ -63,7 +63,7 @@ export default function SignIn() {
       .then((response) => response.text())
       .then((text) => {
         if (text === "OK") {
-          window.location.href = "/admin";
+          window.location.href = "/admin/";
         } else {
           //this.snackbar = true;
           console.log("login failed");

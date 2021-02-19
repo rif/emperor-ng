@@ -1,12 +1,9 @@
 import * as React from "react";
-import { DataGrid } from "@material-ui/data-grid";
-import FormDialog from "./CreateUserDialog";
-import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
+import Button from "@material-ui/core/Button";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import GroupAddIcon from '@material-ui/icons/GroupAdd';
-import UserGroupsDialog from "./UserGroupsDialog";
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -14,12 +11,13 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Title from '../dashboard/Title';
-
-
+import UserGroupsDialog from "./UserGroupsDialog";
+import EditUserDialog from "./CreateUserDialog";
 
 export default function Users() {
     const [users, setUsers] = React.useState([]);
     const [showDialog, setShowDialog] = React.useState(false);
+    const [showUserGroupsDialog, setShowUserGroupsDialog] = React.useState(false);
     const [userGroups, setUserGroups] = React.useState([]);
     const [groups, setGroups] = React.useState([]);
     const [editedUser, setEditedUser] = React.useState({
@@ -62,6 +60,7 @@ export default function Users() {
                     newUsers.push(user);
                 }
                 setUsers(newUsers);
+                handleDialogClose();
             });
     };
 
@@ -97,6 +96,18 @@ export default function Users() {
                     });
             }
         }
+    };
+
+    const handleUserGroupsDialogClose = () => {
+        setShowUserGroupsDialog(false);
+    }
+
+    const handleDialogClose = () => {
+        setShowDialog(false);
+    }
+
+    const handleClickOpen = () => {
+        setShowDialog(true);
     };
 
     const editIcon = row => (
@@ -135,6 +146,7 @@ export default function Users() {
                                 setEditedUser(row);
                                 setUserGroups(json.items);
                                 setGroups(json.groups);
+                                setShowUserGroupsDialog(true);
                             });
                     }}>
             <GroupAddIcon color="primary" />
@@ -159,8 +171,12 @@ export default function Users() {
 
     return (
         <React.Fragment>
-            <FormDialog user={editedUser} status={showDialog} editUserCallback={handleEditUser}/>
-            <UserGroupsDialog user={editedUser} groups={userGroups} allGroups={groups} />
+            <Button variant="outlined" color="primary" onClick={ () => {
+                        setEditedUser({id: "", email: "", firstName: "", lastName: "", phone: ""})
+                        handleClickOpen();
+                    }}>New User</Button>
+            <EditUserDialog open={showDialog} user={editedUser} editUserCallback={handleEditUser} onClose={handleDialogClose}/>
+            <UserGroupsDialog open={showUserGroupsDialog} onClose={handleUserGroupsDialogClose} user={editedUser} groups={userGroups} allGroups={groups} />
             <Title>Users</Title>
             <Table size="small">
                 <TableHead>
