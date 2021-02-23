@@ -45,8 +45,9 @@ export default function Users() {
         })
             .then((resp) => resp.text())
             .then((text) => {
-                user.pass = "";
+                user.pass = '';
                 user.id = text;
+                user.defaultGroup = 'users';
                 const newUsers = [...users];
                 let found = false;
                 for (let i = 0; i < newUsers.length; i++) {

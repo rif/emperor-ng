@@ -67,12 +67,14 @@ func (us *Users) PostHandler(c echo.Context) error {
 		if u.ID != "" {
 			oldUser := &User{}
 			if err := us.db.One("ID", u.ID, oldUser); err == nil {
+				zb
 				u.Password = oldUser.Password
 			}
 		}
 	}
 	if u.ID == "" {
 		u.ID = nuid.Next()
+		u.DefaultGroup = GroupUsers
 		u.CreatedBy = c.Get("email").(string)
 		u.CreatedAt = time.Now()
 		u.ModifiedBy = c.Get("email").(string)
@@ -109,6 +111,10 @@ func (us *Users) ToggleAdminHandler(c echo.Context) error {
 	u := new(User)
 	if err := us.db.One("ID", userID, u); err != nil {
 		return err
+	}
+	if u.Email == c.Get("email").(string) {
+		// do not modify own default group
+		return c.String(http.StatusOK, u.DefaultGroup)
 	}
 	var newGroup string
 	if u.DefaultGroup == GroupUsers {

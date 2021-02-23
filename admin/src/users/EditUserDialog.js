@@ -32,7 +32,7 @@ export default function EditUserDialog({ user, open, editUserCallback, onClose }
                         value={editedUser.email}
                         onChange={(e) =>
                             setEditedUser({
-                                ...user,
+                                ...editedUser,
                                 ["email"]: e.target.value,
                             })
                         }
@@ -45,7 +45,7 @@ export default function EditUserDialog({ user, open, editUserCallback, onClose }
                         value={editedUser.firstName}
                         onChange={(e) =>
                             setEditedUser({
-                                ...user,
+                                ...editedUser,
                                 ["firstName"]: e.target.value,
                             })
                         }
@@ -59,7 +59,7 @@ export default function EditUserDialog({ user, open, editUserCallback, onClose }
                         value={editedUser.lastName}
                         onChange={(e) =>
                             setEditedUser({
-                                ...user,
+                                ...editedUser,
                                 ["lastName"]: e.target.value,
                             })
                         }
@@ -73,7 +73,7 @@ export default function EditUserDialog({ user, open, editUserCallback, onClose }
                         value={editedUser.phone}
                         onChange={(e) =>
                             setEditedUser({
-                                ...user,
+                                ...editedUser,
                                 ["phone"]: e.target.value,
                             })
                         }
@@ -85,7 +85,7 @@ export default function EditUserDialog({ user, open, editUserCallback, onClose }
                         margin="dense"
                         onChange={(e) =>
                             setEditedUser({
-                                ...user,
+                                ...editedUser,
                                 ["pass"]: e.target.value,
                             })
                         }
