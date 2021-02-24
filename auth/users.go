@@ -67,7 +67,6 @@ func (us *Users) PostHandler(c echo.Context) error {
 		if u.ID != "" {
 			oldUser := &User{}
 			if err := us.db.One("ID", u.ID, oldUser); err == nil {
-				zb
 				u.Password = oldUser.Password
 			}
 		}
