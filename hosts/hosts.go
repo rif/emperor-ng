@@ -17,6 +17,7 @@ type Host struct {
 	ID         string    `storm:"id" json:"id"`
 	Name       string    `storm:"index" json:"name"`
 	Address    string    `storm:"unique" json:"address"`
+	Port       string    `json:"port"`
 	CreatedAt  time.Time `storm:"index" json:"createdAt"`
 	CreatedBy  string    `storm:"index" json:"createdBy"`
 	ModifiedAt time.Time `storm:"index" json:"modifiedAt"`
@@ -114,7 +115,7 @@ func (cs *Hosts) PostHandler(c echo.Context) error {
 	if err := cs.db.Save(host); err != nil {
 		return err
 	}
-	log.Info().Str("address", host.Address).Str("name", host.Name).Interface("admin", c.Get("email")).Msg("created new host")
+	log.Info().Str("address", host.Address).Str("port", host.Port).Str("name", host.Name).Interface("admin", c.Get("email")).Msg("created new host")
 	return c.String(http.StatusOK, host.ID)
 }
 
@@ -130,6 +131,6 @@ func (cs *Hosts) DeleteHandler(c echo.Context) error {
 	if err := cs.db.Select(q.Eq("HostID", host.ID)).Delete(new(HostGroup)); err != nil && err != storm.ErrNotFound {
 		return err
 	}
-	log.Info().Str("address", host.Address).Str("name", host.Name).Interface("admin", c.Get("email")).Msg("deleted host")
+	log.Info().Str("address", host.Address).Str("port", host.Port).Str("name", host.Name).Interface("admin", c.Get("email")).Msg("deleted host")
 	return c.NoContent(http.StatusOK)
 }
