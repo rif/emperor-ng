@@ -16,13 +16,6 @@ type Client struct {
 	db *storm.DB
 }
 
-type ExecRequest struct {
-	HostID    string
-	CommandID string
-	Params    string
-	Watch     bool
-}
-
 func NewClient(db *storm.DB) *Client {
 	return &Client{db: db}
 }
@@ -105,8 +98,13 @@ func (cl *Client) AvailableDataHandler(c echo.Context) error {
 }
 
 func (cl *Client) ExecuteHandler(c echo.Context) error {
-	er := new(ExecRequest)
-	if err := c.Bind(er); err != nil {
+	er := struct {
+		HostID    string `json:"hostID"`
+		CommandID string `json:"commandID"`
+		Params    string `json:"params"`
+		Watch     bool   `json:"watch"`
+	}{}
+	if err := c.Bind(&er); err != nil {
 		return err
 	}
 	log.Info().Interface("execReq", er).Send()
