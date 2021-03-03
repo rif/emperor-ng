@@ -10,6 +10,9 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import Button from '@material-ui/core/Button';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 
 function Copyright() {
     return (
@@ -48,19 +51,38 @@ const useStyles = makeStyles((theme) => ({
 
 export default function App() {
     const classes = useStyles();
-    const [users, setUsers] = React.useState([]);
+    const [commands, setCommands] = React.useState([]);
+    const [command, setCommand] = React.useState(null);
     const [hosts, setHosts] = React.useState([]);
+    const [host, setHost] = React.useState(null);
+    const [params, setParams] = React.useState('');
+    const [watch, setWatch] = React.useState(false);
+    
+    const handleExecute = (e) => {
+        console.log(host, command, params);
+        fetch(`/execute?csrf=${window.csrf}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                hostId: host.id,
+                commandId: command.id,
+                params: params,
+            }),
+        })
+            .then((resp) => resp.text())
+            .then((text) => {
+                console.log(text);
+            });
+    };
 
     React.useEffect(() => {
-        fetch("/adm/availablecommands")
+        fetch("/availabledata")
             .then((response) => response.json())
             .then((json) => {
-                
-            });
-        fetch("/adm/availablehosts")
-            .then((response) => response.json())
-            .then((json) => {
-                
+                setCommands(json.commands);
+                setHosts(json.hosts);
             });
     }, []);
 
@@ -112,32 +134,44 @@ export default function App() {
                             </Card>
                         </Paper>
                     </Grid>
-                    <Grid item xs={4}>
-                        <Autocomplete
-                            id="combo-box-demo"
-                            options={users}
-                            getOptionLabel={(option) => option.title}
-                            style={{ width: '100%' }}
-                            renderInput={(params) => <TextField {...params} label="Combo box" variant="outlined" />}
-                        />
-                    </Grid>
-                    <Grid item xs={4}>
+                    <Grid item xs={3}>
                         <Autocomplete
                             id="combo-box-demo"
                             options={hosts}
-                            getOptionLabel={(option) => option.title}
+                            getOptionLabel={(option) => option.name}
                             style={{ width: '100%' }}
-                            renderInput={(params) => <TextField {...params} label="Combo box" variant="outlined" />}
+                            onChange={(e,v) => setHost(v)}
+                            renderInput={(params) => <TextField {...params} label="Host" variant="outlined" />}
                         />
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid item xs={3}>
                         <Autocomplete
                             id="combo-box-demo"
-                            options={users}
-                            getOptionLabel={(option) => option.title}
+                            options={commands}
+                            getOptionLabel={(option) => `${option.description} (${option.address})`}
                             style={{ width: '100%' }}
-                            renderInput={(params) => <TextField {...params} label="Combo box" variant="outlined" />}
+                            onChange={(e,v) => setCommand(v)}
+                            renderInput={(params) => <TextField {...params} label="Command" variant="outlined" />}
                         />
+                    </Grid>
+                    <Grid item xs={3}>
+                        <TextField {...params} label="Params" variant="outlined" onChange={(e) => setParams(e.target.value)} />
+                    </Grid>
+                    <Grid item xs={1}>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={watch}
+                                    onChange={(e) => setWatch(e.target.checked)}
+                                    name="checked"
+                                    color="primary"
+                                />
+                            }
+                            label="Watch"
+                        />
+                    </Grid>
+                    <Grid item xs={2}>
+                            <Button variant="outlined" color="primary" size="large" onClick={handleExecute}>Execute</Button>
                     </Grid>
                 </Grid>
             </Container>

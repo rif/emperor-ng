@@ -23,7 +23,9 @@ export default function Hosts() {
     const [editedHost, setEditedHost] = React.useState({
         id: "",
         name: "",
-        address: ""
+        address: "",
+        port: "",
+        description: "",
     });
 
     const handleEditHost = (host) => {
@@ -36,6 +38,8 @@ export default function Hosts() {
                 id: host.id,
                 name: host.name,
                 address: host.address,
+                port: host.port,
+                description: host.description,
             }),
         })
             .then((resp) => resp.text())
@@ -105,7 +109,7 @@ export default function Hosts() {
     };
 
     const editIcon = row => (
-        <IconButton onClick={() => {
+        <IconButton title="Edit" onClick={() => {
                         setEditedHost(row);
                         setShowDialog(true);
                     }}>
@@ -114,7 +118,7 @@ export default function Hosts() {
     );
 
     var groupsIcon = row => (
-        <IconButton onClick={() => {
+        <IconButton title="Manage Groups" onClick={() => {
                         fetch(`/adm/hostgroups/${row.id}`)
                             .then((response) => response.json())
                             .then((json) => {
@@ -129,7 +133,7 @@ export default function Hosts() {
     );
 
     var deleteIcon = row => (
-        <IconButton onClick={() => {
+        <IconButton title="Delete" onClick={() => {
                         handleRemoveHost(row);
                     }}>
             <DeleteIcon color="secondary" />
@@ -147,7 +151,7 @@ export default function Hosts() {
     return (
         <React.Fragment>
             <Button style={{float:'right'}} variant="outlined" color="primary" onClick={ () => {
-                        setEditedHost({id: "", name: "", address: ""})
+                        setEditedHost({id: "", name: "", address: "", port:"", description:""})
                         handleClickOpen();
                     }}>New Host</Button>
             <EditHostDialog open={showDialog} host={editedHost} editHostCallback={handleEditHost} onClose={handleDialogClose}/>
@@ -158,6 +162,8 @@ export default function Hosts() {
                     <TableRow>
                         <TableCell>Name</TableCell>
                         <TableCell>Address</TableCell>
+                        <TableCell>Port</TableCell>
+                        <TableCell>Description</TableCell>
                         <TableCell align="right">Actions</TableCell>
                     </TableRow>
                 </TableHead>
@@ -166,6 +172,8 @@ export default function Hosts() {
                         <TableRow key={host.id}>
                             <TableCell>{host.name}</TableCell>
                             <TableCell>{host.address}</TableCell>
+                            <TableCell>{host.port}</TableCell>
+                            <TableCell>{host.description}</TableCell>
                             <TableCell align="right">
                                 {editIcon(host)}
                                 {groupsIcon(host)}

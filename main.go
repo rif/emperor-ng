@@ -3,6 +3,7 @@ package main
 import (
 	"emperor-ng/auth"
 	"emperor-ng/commands"
+	"emperor-ng/engine"
 	"emperor-ng/hosts"
 	"errors"
 	"flag"
@@ -77,6 +78,7 @@ func main() {
 	cg := commands.NewCommandGroups(db)
 	hsts := hosts.NewHosts(db)
 	hg := hosts.NewHostGroups(db)
+	client := engine.NewClient(db)
 
 	t := &templ{
 		templates: make(map[string]*template.Template),
@@ -142,7 +144,6 @@ func main() {
 	a.GET("/commands", cmds.GetHandler)
 	a.POST("/command", cmds.PostHandler)
 	a.DELETE("/command", cmds.DeleteHandler)
-	a.GET("/availablecommands", cmds.AvailableHandler)
 
 	// commandsgroups
 	a.GET("/commandgroups/:command", cg.GetHandler)
@@ -152,7 +153,6 @@ func main() {
 	a.GET("/hosts", hsts.GetHandler)
 	a.POST("/host", hsts.PostHandler)
 	a.DELETE("/host", hsts.DeleteHandler)
-	a.GET("/availablehosts", hsts.AvailableHandler)
 
 	// hostsgroups
 	a.GET("/hostgroups/:host", hg.GetHandler)
@@ -162,6 +162,10 @@ func main() {
 	a.GET("/keys", keys.GetHandler)
 	a.POST("/key", keys.PostHandler)
 	a.DELETE("/key", keys.DeleteHandler)
+
+	// client
+	l.GET("/availabledata", client.AvailableDataHandler)
+	l.POST("/execute", client.ExecuteHandler)
 
 	dbg := e.Group("/debug")
 	dbg.GET("/pprof/*", func(c echo.Context) error {

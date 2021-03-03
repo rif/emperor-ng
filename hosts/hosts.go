@@ -1,8 +1,6 @@
 package hosts
 
 import (
-	"emperor-ng/auth"
-	"emperor-ng/utils"
 	"net/http"
 	"time"
 
@@ -14,14 +12,15 @@ import (
 )
 
 type Host struct {
-	ID         string    `storm:"id" json:"id"`
-	Name       string    `storm:"index" json:"name"`
-	Address    string    `storm:"unique" json:"address"`
-	Port       string    `json:"port"`
-	CreatedAt  time.Time `storm:"index" json:"createdAt"`
-	CreatedBy  string    `storm:"index" json:"createdBy"`
-	ModifiedAt time.Time `storm:"index" json:"modifiedAt"`
-	ModifiedBy string    `storm:"index" json:"modifiedBy"`
+	ID          string    `storm:"id" json:"id"`
+	Name        string    `storm:"index" json:"name"`
+	Address     string    `storm:"unique" json:"address"`
+	Port        string    `json:"port"`
+	Description string    `storm:"index" json:"description"`
+	CreatedAt   time.Time `storm:"index" json:"createdAt"`
+	CreatedBy   string    `storm:"index" json:"createdBy"`
+	ModifiedAt  time.Time `storm:"index" json:"modifiedAt"`
+	ModifiedBy  string    `storm:"index" json:"modifiedBy"`
 }
 
 type Hosts struct {
@@ -44,59 +43,6 @@ func (cs *Hosts) GetHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-func (cs *Hosts) AvailableHandler(c echo.Context) error {
-	email := c.Get("email")
-	group := c.Get("group")
-	hosts := make([]Host, 0)
-	if err := cs.db.AllByIndex("CreatedAt", &hosts); err != nil && err != storm.ErrNotFound {
-		return err
-	}
-	if group == auth.GroupAdmins {
-		response := map[string]interface{}{
-			"items": hosts,
-		}
-		return c.JSON(http.StatusOK, response)
-	}
-
-	// get logged in user
-	var user auth.User
-	if err := cs.db.Find("Email", email, &user); err != nil {
-		return err
-	}
-
-	// get user extra groups
-	var userGroups []auth.UserGroup
-	if err := cs.db.Find("UserID", user.ID, &userGroups); err != nil && err != storm.ErrNotFound {
-		return err
-	}
-	var userGroupsString []string
-	for _, ug := range userGroups {
-		userGroupsString = append(userGroupsString, ug.GroupID)
-	}
-
-	availableHosts := make([]Host, 0)
-	for _, cmd := range hosts {
-		// get host groups
-		var hostGroups []HostGroup
-		if err := cs.db.Find("HostID", cmd.ID, &hostGroups); err != nil && err != storm.ErrNotFound {
-			return err
-		}
-		var hostGroupsString []string
-		for _, cg := range hostGroups {
-			hostGroupsString = append(hostGroupsString, cg.GroupID)
-		}
-
-		if len(hostGroups) == 0 || utils.ContainsAny(hostGroupsString, userGroupsString...) {
-			availableHosts = append(availableHosts, cmd)
-		}
-	}
-
-	response := map[string]interface{}{
-		"items": availableHosts,
-	}
-	return c.JSON(http.StatusOK, response)
-}
-
 func (cs *Hosts) PostHandler(c echo.Context) error {
 	host := new(Host)
 	if err := c.Bind(host); err != nil {
@@ -115,7 +61,7 @@ func (cs *Hosts) PostHandler(c echo.Context) error {
 	if err := cs.db.Save(host); err != nil {
 		return err
 	}
-	log.Info().Str("address", host.Address).Str("port", host.Port).Str("name", host.Name).Interface("admin", c.Get("email")).Msg("created new host")
+	log.Info().Str("address", host.Address).Str("port", host.Port).Str("description", host.Description).Str("name", host.Name).Interface("admin", c.Get("email")).Msg("created new host")
 	return c.String(http.StatusOK, host.ID)
 }
 
@@ -131,6 +77,6 @@ func (cs *Hosts) DeleteHandler(c echo.Context) error {
 	if err := cs.db.Select(q.Eq("HostID", host.ID)).Delete(new(HostGroup)); err != nil && err != storm.ErrNotFound {
 		return err
 	}
-	log.Info().Str("address", host.Address).Str("port", host.Port).Str("name", host.Name).Interface("admin", c.Get("email")).Msg("deleted host")
+	log.Info().Str("address", host.Address).Str("port", host.Port).Str("description", host.Description).Str("name", host.Name).Interface("admin", c.Get("email")).Msg("deleted host")
 	return c.NoContent(http.StatusOK)
 }

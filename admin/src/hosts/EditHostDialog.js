@@ -55,6 +55,34 @@ export default function EditHostDialog({ host, open, editHostCallback, onClose }
                         type="text"
                         fullWidth
                     />
+                    <TextField
+                        margin="dense"
+                        value={editedHost.port}
+                        onChange={(e) =>
+                            setEditedHost({
+                                ...editedHost,
+                                ["port"]: e.target.value,
+                            })
+                        }
+                        id="port"
+                        label="SSH Port"
+                        type="text"
+                        fullWidth
+                    />
+                    <TextField
+                        margin="dense"
+                        value={editedHost.description}
+                        onChange={(e) =>
+                            setEditedHost({
+                                ...editedHost,
+                                ["description"]: e.target.value,
+                            })
+                        }
+                        id="description"
+                        label="Description"
+                        type="text"
+                        fullWidth
+                    />
 
                 </DialogContent>
                 <DialogActions>
